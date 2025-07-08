@@ -12,6 +12,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+print(f"--- Is Gemini API Key Loaded? -> {os.getenv('GEMINI_API_KEY')}")
+
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 # Configuration
@@ -24,103 +26,69 @@ db.init_app(app)
 
 @app.route('/')
 def index():
-    """Main route - render the chat interface"""
+    """Rota principal - mostra a interface do chat"""
     return render_template('index.html')
 
 @app.route('/api/predefined', methods=['GET'])
 def get_predefined_qa():
-    """Get predefined Q&A based on crop and stage"""
+    """Obter perguntas e respostas pré-definidas com base na cultura e fase"""
     try:
-        # Get user's IP address
         ip_address = request.remote_addr
-        
-        # Check rate limit
         if not check_and_update_limit(ip_address):
-            return jsonify({'error': 'You have reached the daily message limit.'}), 429
-        
-        # Get parameters from request
+            return jsonify({'error': 'Atingiu o limite diário de mensagens.'}), 429
         crop = request.args.get('crop', '').lower()
         stage = request.args.get('stage', '').lower()
-        
         if not crop or not stage:
-            return jsonify({'error': 'Missing crop or stage parameter'}), 400
-        
-        # Get random predefined Q&A
+            return jsonify({'error': 'Falta o parâmetro cultura ou fase.'}), 400
         prompt, answer = get_random_predefined_qa(stage, crop)
-        
         if not prompt or not answer:
-            return jsonify({'error': 'No predefined Q&A found for this crop and stage'}), 404
-        
-        # Log the interaction
+            return jsonify({'error': 'Não foram encontradas perguntas e respostas para esta cultura e fase.'}), 404
         visitor_id = hash_ip_address(ip_address)
-        log_message(visitor_id, 'user', f"Requested {stage} advice for {crop}")
+        log_message(visitor_id, 'user', f"Pediu conselho para a fase {stage} da cultura {crop}")
         log_message(visitor_id, 'assistant', answer)
-        
-        return jsonify({
-            'prompt': prompt,
-            'answer': answer,
-            'crop': crop,
-            'stage': stage
-        })
-        
+        return jsonify({'prompt': prompt, 'answer': answer, 'crop': crop, 'stage': stage})
     except Exception as e:
-        app.logger.error(f"Error in predefined Q&A endpoint: {str(e)}")
-        return jsonify({'error': 'Internal server error'}), 500
+        app.logger.error(f"Erro no endpoint de perguntas e respostas pré-definidas: {str(e)}")
+        return jsonify({'error': 'Erro interno do servidor.'}), 500
 
 @app.route('/api/send_message', methods=['POST'])
 def send_message():
-    """Send message to Gemini AI and get response"""
+    """Enviar mensagem para a IA Gemini e obter resposta"""
     try:
-        # Get user's IP address
         ip_address = request.remote_addr
-        
-        # Check rate limit
         if not check_and_update_limit(ip_address):
-            return jsonify({'error': 'You have reached the daily message limit.'}), 429
-        
-        # Get message from request body
+            return jsonify({'error': 'Atingiu o limite diário de mensagens.'}), 429
         data = request.get_json()
         if not data or 'message' not in data:
-            return jsonify({'error': 'Message is required'}), 400
-        
+            return jsonify({'error': 'A mensagem é obrigatória.'}), 400
         user_message = data['message'].strip()
         if not user_message:
-            return jsonify({'error': 'Message cannot be empty'}), 400
-        
-        # Get AI response
+            return jsonify({'error': 'A mensagem não pode estar vazia.'}), 400
         ai_response = get_gemini_response(user_message)
-        
         if ai_response is None:
-            return jsonify({'error': 'Unable to get AI response. Please try again later.'}), 500
-        
-        # Log the interaction
+            return jsonify({'error': 'Não foi possível obter resposta da IA. Tente novamente mais tarde.'}), 500
         visitor_id = hash_ip_address(ip_address)
         log_message(visitor_id, 'user', user_message)
         log_message(visitor_id, 'assistant', ai_response)
-        
-        return jsonify({
-            'response': ai_response,
-            'message': user_message
-        })
-        
+        return jsonify({'response': ai_response, 'message': user_message})
     except Exception as e:
-        app.logger.error(f"Error in send message endpoint: {str(e)}")
-        return jsonify({'error': 'Internal server error'}), 500
+        app.logger.error(f"Erro no endpoint de envio de mensagem: {str(e)}")
+        return jsonify({'error': 'Erro interno do servidor.'}), 500
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    """Health check endpoint"""
-    return jsonify({'status': 'healthy', 'message': 'AgritechMoz Chat API is running'})
+    """Endpoint de verificação de saúde"""
+    return jsonify({'status': 'saudável', 'message': 'A API do AgritechMoz Chat está a funcionar'})
 
-# Error handlers
+# Gestores de erros
 @app.errorhandler(404)
 def not_found(error):
-    return jsonify({'error': 'Not found'}), 404
+    return jsonify({'error': 'Não encontrado'}), 404
 
 @app.errorhandler(500)
 def internal_error(error):
     db.session.rollback()
-    return jsonify({'error': 'Internal server error'}), 500
+    return jsonify({'error': 'Erro interno do servidor.'}), 500
 
 if __name__ == '__main__':
     # Create database tables
