@@ -40,10 +40,10 @@ def get_predefined_qa():
         stage = request.args.get('stage', '').lower()
         if not crop or not stage:
             return jsonify({'error': 'Falta o parâmetro cultura ou fase.'}), 400
-        prompt, answer = get_random_predefined_qa(stage, crop)
+        visitor_id = hash_ip_address(ip_address)
+        prompt, answer = get_random_predefined_qa(stage, crop, visitor_id)
         if not prompt or not answer:
             return jsonify({'error': 'Não foram encontradas perguntas e respostas para esta cultura e fase.'}), 404
-        visitor_id = hash_ip_address(ip_address)
         log_message(visitor_id, 'user', f"Pediu conselho para a fase {stage} da cultura {crop}")
         log_message(visitor_id, 'assistant', answer)
         return jsonify({'prompt': prompt, 'answer': answer, 'crop': crop, 'stage': stage})

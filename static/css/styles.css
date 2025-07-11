@@ -54,7 +54,34 @@ body {
 .card-title {
     color: #333;
     font-size: 0.9rem;
-    margin-bottom: 11px;
+    margin-bottom: 5px;
+}
+
+.question-counter {
+    margin-top: 5px;
+    text-align: center;
+    position: relative;
+}
+
+.counter-number {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #2E7D32;
+    margin-bottom: 2px;
+    line-height: 1.2;
+}
+
+
+
+.card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.card.disabled .counter-number {
+    color: #999;
 }
 
 .score {
@@ -281,6 +308,16 @@ body {
     .mobile-cards {
         display: block;
     }
+    
+    .question-counter {
+        margin-top: 4px;
+    }
+    
+    .counter-number {
+        font-size: 0.95rem;
+    }
+    
+
 }
 
 /* Extra small devices adjustments */

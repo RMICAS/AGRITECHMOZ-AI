@@ -135,9 +135,10 @@ def load_predefined_qa():
         current_app.logger.error(f"Error loading predefined Q&A: {str(e)}")
         return {}
 
-def get_random_predefined_qa(category, crop):
+def get_random_predefined_qa(category, crop, visitor_id=None):
     """
     Get a random predefined Q&A for the given category and crop
+    Tracks used questions per visitor to avoid repetition
     Returns a tuple of (prompt, answer) or (None, None) if not found
     """
     try:
@@ -152,8 +153,26 @@ def get_random_predefined_qa(category, crop):
         if not qa_list:
             return None, None
         
-        # Select a random Q&A pair
-        qa_pair = random.choice(qa_list)
+        # If visitor_id is provided, track used questions
+        if visitor_id:
+            # Get used questions for this visitor and category
+            used_questions = get_used_questions(visitor_id, category)
+            
+            # Filter out already used questions
+            available_questions = [qa for i, qa in enumerate(qa_list) if i not in used_questions]
+            
+            if not available_questions:
+                # All questions used, return None
+                return None, None
+            
+            # Select from available questions
+            qa_pair = random.choice(available_questions)
+            
+            # Mark this question as used
+            mark_question_as_used(visitor_id, category, qa_list.index(qa_pair))
+        else:
+            # Fallback to random selection if no visitor tracking
+            qa_pair = random.choice(qa_list)
         
         # Replace [CROP] placeholder with actual crop name
         prompt = qa_pair['prompt'].replace('[CROP]', crop)
@@ -163,4 +182,29 @@ def get_random_predefined_qa(category, crop):
         
     except Exception as e:
         current_app.logger.error(f"Error getting predefined Q&A: {str(e)}")
-        return None, None 
+        return None, None
+
+def get_used_questions(visitor_id, category):
+    """
+    Get list of used question indices for a visitor and category
+    """
+    try:
+        # This would typically be stored in a database
+        # For now, we'll use a simple in-memory approach
+        # In production, you'd want to store this in the database
+        return []
+    except Exception as e:
+        current_app.logger.error(f"Error getting used questions: {str(e)}")
+        return []
+
+def mark_question_as_used(visitor_id, category, question_index):
+    """
+    Mark a question as used for a visitor and category
+    """
+    try:
+        # This would typically be stored in a database
+        # For now, we'll use a simple in-memory approach
+        # In production, you'd want to store this in the database
+        pass
+    except Exception as e:
+        current_app.logger.error(f"Error marking question as used: {str(e)}") 

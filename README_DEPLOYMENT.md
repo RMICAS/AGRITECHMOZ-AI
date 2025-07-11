@@ -1,81 +1,68 @@
-# AgritechMoz Chat - Deployment Guide for Namecheap cPanel
+# cPanel Deployment Guide
 
 ## Prerequisites
-- Namecheap hosting account with Python support
-- cPanel access
-- Python 3.8+ enabled on your hosting
 
-## Deployment Steps
+1. Make sure you have Python 3.9+ enabled in your cPanel
+2. Ensure all required packages are installed
 
-### 1. Upload Files
-1. Upload all project files to your hosting directory (usually `public_html` or a subdomain)
-2. Ensure the following files are in the root directory:
-   - `passenger_wsgi.py`
-   - `run.py`
-   - `requirements.txt`
-   - `.htaccess`
-   - All other project files
+## Files Structure
 
-### 2. Set Up Python Environment
-1. In cPanel, go to "Setup Python App"
-2. Create a new Python application
-3. Set Python version to 3.8 or higher
-4. Set the application root to your project directory
-5. Set the application startup file to `passenger_wsgi.py`
+Your application should have these key files:
+- `passenger_wsgi.py` - WSGI entry point for cPanel
+- `run.py` - Main Flask application
+- `requirements.txt` - Python dependencies
+- `.env` - Environment variables (create this file)
 
-### 3. Install Dependencies
-1. In cPanel, go to "Terminal" or use SSH
-2. Navigate to your project directory
-3. Run: `pip install -r requirements.txt`
+## Environment Variables
 
-### 4. Environment Variables
-1. Create a `.env` file in your project root with:
+Create a `.env` file in your root directory with:
+
 ```
 GEMINI_API_KEY=your_gemini_api_key_here
 SECRET_KEY=your_secret_key_here
 DATABASE_URL=sqlite:///agritech_chat.db
 ```
 
-### 5. Database Setup
-The SQLite database will be created automatically when the app first runs.
+## Installation Steps
 
-### 6. File Permissions
-Ensure the following directories have write permissions:
-- `instance/` (for database)
-- `static/` (for static files)
+1. Upload all files to your cPanel directory
+2. In cPanel, go to "Setup Python App"
+3. Create a new Python app pointing to your directory
+4. Set the Python version to 3.9 or higher
+5. Set the application root to your directory
+6. Set the application URL to your domain/subdomain
+7. Set the application startup file to `passenger_wsgi.py`
 
-### 7. Test the Application
-1. Visit your domain/subdomain
-2. The app should load and show the AgritechMoz Chat interface
-3. Test the chat functionality
+## Database Setup
+
+The application will automatically create the SQLite database when it starts. Make sure the directory has write permissions.
 
 ## Troubleshooting
 
 ### Common Issues:
-1. **500 Error**: Check Python version compatibility
-2. **Import Errors**: Ensure all dependencies are installed
-3. **Database Errors**: Check file permissions for the instance directory
-4. **API Errors**: Verify GEMINI_API_KEY is set correctly
 
-### Logs:
-- Check cPanel error logs
-- Check Python application logs in cPanel
+1. **Import Errors**: Make sure all files are uploaded and `requirements.txt` is in the root directory
+2. **Database Errors**: Check write permissions for the directory
+3. **Environment Variables**: Ensure `.env` file is uploaded and contains correct values
+4. **Python Version**: Make sure Python 3.9+ is selected in cPanel
 
-## Security Notes
-- Keep your `.env` file secure and don't commit it to version control
-- The app runs in production mode (debug=False)
-- SQLite database is suitable for testing but consider PostgreSQL for production
+### Debug Steps:
 
-## File Structure
-```
-your_project/
-├── passenger_wsgi.py      # cPanel entry point
-├── run.py                 # Flask app
-├── requirements.txt       # Python dependencies
-├── .htaccess             # Apache configuration
-├── .env                  # Environment variables (create this)
-├── static/               # Static files
-├── templates/            # HTML templates
-├── data/                 # JSON data
-└── instance/             # Database (created automatically)
-``` 
+1. Check the error logs in cPanel
+2. Test the import locally: `python -c "from run import app; print('OK')"`
+3. Verify all dependencies are installed
+4. Check file permissions
+
+## Health Check
+
+Once deployed, you can test the application by visiting:
+- `https://yourdomain.com/` - Main application
+- `https://yourdomain.com/api/health` - Health check endpoint
+
+## Support
+
+If you encounter issues:
+1. Check cPanel error logs
+2. Verify all files are uploaded correctly
+3. Ensure environment variables are set
+4. Test the application locally first 

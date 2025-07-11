@@ -33,6 +33,77 @@ document.addEventListener('DOMContentLoaded', function() {
     let isRateLimited = false;
     let sessionStarted = false;
     
+    // Counter management for predefined questions
+    let questionCounters = {
+        sowing: 10,
+        growth: 10,
+        harvest: 10,
+        financial: 10
+    };
+    
+    // Initialize counters from localStorage if available
+    function initializeCounters() {
+        const savedCounters = localStorage.getItem('questionCounters');
+        if (savedCounters) {
+            questionCounters = JSON.parse(savedCounters);
+        }
+        updateAllCounters();
+    }
+    
+    // Update counter display for a specific category
+    function updateCounter(category) {
+        const counter = questionCounters[category];
+        const counterElements = document.querySelectorAll(`#${category}-counter, #${category}-counter-mobile`);
+        
+        counterElements.forEach(element => {
+            element.textContent = counter;
+        });
+        
+        // Disable card if counter reaches 0
+        const cards = document.querySelectorAll(`[data-category="${category}"]`);
+        cards.forEach(card => {
+            if (counter <= 0) {
+                card.classList.add('disabled');
+            } else {
+                card.classList.remove('disabled');
+            }
+        });
+    }
+    
+    // Update all counters
+    function updateAllCounters() {
+        Object.keys(questionCounters).forEach(category => {
+            updateCounter(category);
+        });
+    }
+    
+    // Decrease counter for a category
+    function decreaseCounter(category) {
+        if (questionCounters[category] > 0) {
+            questionCounters[category]--;
+            localStorage.setItem('questionCounters', JSON.stringify(questionCounters));
+            updateCounter(category);
+            
+            // Check if all categories are now depleted
+            checkAllCategoriesDepleted();
+            
+            return true;
+        }
+        return false;
+    }
+    
+    // Reset all counters (for testing or new session)
+    function resetCounters() {
+        questionCounters = {
+            sowing: 10,
+            growth: 10,
+            harvest: 10,
+            financial: 10
+        };
+        localStorage.setItem('questionCounters', JSON.stringify(questionCounters));
+        updateAllCounters();
+    }
+    
     // Function to get number of visible crops based on screen size
     function getVisibleCropsCount() {
         if (window.innerWidth <= 430) {
@@ -57,6 +128,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!sessionStarted && chatMessages.children.length === 0) {
             addMessage("Olá e bem-vindo ao AgritechMoz Chat! Sou o teu parceiro agrícola moçambicano, aqui para ajudar-te em qualquer etapa das tuas actividades agrícolas. Diz-me qual a cultura e a fase, e começamos já!", false);
             sessionStarted = true;
+        }
+    }
+    
+    // Check if all categories are depleted
+    function checkAllCategoriesDepleted() {
+        const allDepleted = Object.values(questionCounters).every(counter => counter <= 0);
+        if (allDepleted) {
+            addMessage("Utilizaste todas as perguntas pré-definidas! Podes continuar a fazer perguntas livres sobre agricultura.", false);
         }
     }
 
@@ -267,6 +346,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const category = card.getAttribute('data-category');
         
+        // Check if counter is available for this category
+        if (questionCounters[category] <= 0) {
+            addMessage("Já utilizaste todas as perguntas disponíveis para esta categoria. Tenta outra categoria ou faz uma pergunta livre.", false, true);
+            return;
+        }
+        
         try {
             card.style.opacity = '0.7';
             card.style.cursor = 'wait';
@@ -276,8 +361,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             if (response.ok) {
-                addMessage(data.prompt, true);
-                addMessage(data.answer, false);
+                // Decrease counter only if the request was successful
+                if (decreaseCounter(category)) {
+                    addMessage(data.prompt, true);
+                    addMessage(data.answer, false);
+                }
             } else {
                 if (response.status === 429) { // Specifically check for the rate limit status code
                     isRateLimited = true;
@@ -340,6 +428,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listener for sign off button
     if (signOffButton) {
         signOffButton.addEventListener('click', () => {
+            // Reset counters and reload
+            resetCounters();
             location.reload();
         });
         console.log('Sign off button event listener added');
@@ -454,6 +544,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check for first interaction when page loads
     checkFirstInteraction();
+    
+    // Initialize counters on page load with a small delay to ensure DOM is ready
+    setTimeout(() => {
+        initializeCounters();
+    }, 100);
     
     // ... All your other initial setup functions and event listeners ...
 });
