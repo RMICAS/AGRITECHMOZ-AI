@@ -180,7 +180,7 @@ body {
     border: none;
     border-radius: 20px;
     padding: 15px 60px 15px 20px;
-    font-size: 1rem;
+    font-size: 0.85rem;
     width: 100%;
 }
 
@@ -258,27 +258,37 @@ body {
     margin-bottom: 30px;
 }
 
+.mobile-cards-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+}
+
 .cards-scroll-container {
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
     scrollbar-color: #2E7D32 #f1f1f1;
-    padding-bottom: 10px;
+    padding-bottom: 15px;
+    margin-bottom: 5px;
 }
 
 .cards-scroll-container::-webkit-scrollbar {
-    height: 6px;
+    height: 8px;
+    display: block;
 }
 
 .cards-scroll-container::-webkit-scrollbar-track {
     background: #f1f1f1;
-    border-radius: 3px;
+    border-radius: 4px;
 }
 
 .cards-scroll-container::-webkit-scrollbar-thumb {
     background: #2E7D32;
-    border-radius: 3px;
+    border-radius: 4px;
 }
 
 .mobile-cards .d-flex {
@@ -288,15 +298,50 @@ body {
 
 .mobile-cards .card {
     margin: 0 5px;
-    min-height: 90px;
+    min-height: 56.7px; /* 10% smaller than 63px */
     aspect-ratio: 1;
-    width: calc((100vw - 10% - 16px) / 3);
+    width: calc(((100vw - 10% - 16px) / 2) * 0.63); /* 10% smaller than 0.7 */
     flex: 0 0 auto;
 }
 
 .mobile-cards .icon-container {
-    font-size: 2rem;
-    margin-bottom: 6px;
+    font-size: 1.26rem; /* 10% smaller than 1.4rem */
+    margin-bottom: 3.6px; /* 10% smaller than 4px */
+}
+
+.mobile-carousel-arrow {
+    background-color: #2E7D32;
+    color: white;
+    border: 2px solid #1B5E20;
+    border-radius: 50%;
+    width: 34px; /* 15% smaller than 40px */
+    height: 34px; /* 15% smaller than 40px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    flex-shrink: 0;
+    position: relative;
+    min-width: 34px; /* 15% smaller than 40px */
+    min-height: 34px; /* 15% smaller than 40px */
+}
+
+.mobile-carousel-arrow:hover {
+    background-color: #1B5E20;
+    transform: scale(1.1);
+}
+
+.mobile-carousel-arrow:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.mobile-carousel-arrow i {
+    font-size: 0.9rem;
 }
 
 /* Hide desktop cards and show mobile cards */
@@ -309,6 +354,24 @@ body {
         display: block;
     }
     
+    /* Position chat input at bottom of viewport on mobile */
+    .chat-input-container {
+        position: fixed;
+        bottom: 15px;
+        left: 5px;
+        right: 5px;
+        margin: 0;
+        border-radius: 25px;
+        z-index: 1000;
+        background: white;
+        box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Add bottom padding to prevent content from being hidden behind fixed input */
+    .container-fluid {
+        padding-bottom: 80px;
+    }
+    
     .question-counter {
         margin-top: 4px;
     }
@@ -317,27 +380,73 @@ body {
         font-size: 0.95rem;
     }
     
+    /* Ensure scrollbar is always visible on mobile */
+    .cards-scroll-container {
+        overflow-x: scroll;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .cards-scroll-container::-webkit-scrollbar {
+        height: 8px;
+        display: block !important;
+    }
+    
+    /* Mobile carousel adjustments */
+    .mobile-cards-container {
+        gap: 5px;
+    }
+    
+    .mobile-carousel-arrow {
+        width: 25.5px; /* 15% smaller than 30px */
+        height: 25.5px; /* 15% smaller than 30px */
+    }
+    
+    .mobile-carousel-arrow i {
+        font-size: 0.68rem; /* 15% smaller than 0.8rem */
+    }
+}
 
+/* Desktop override - restore original chat input positioning for larger screens */
+@media (min-width: 769px) {
+    .chat-input-container {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        right: auto;
+        margin-top: 50px;
+        margin-bottom: 15px;
+        border-radius: 25px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .container-fluid {
+        padding-bottom: 0;
+    }
+    
+    /* Reduce spacing between desktop cards and chat input */
+    .desktop-cards {
+        margin-bottom: 15px !important;
+    }
 }
 
 /* Extra small devices adjustments */
 @media (max-width: 375px) {
     .mobile-cards .card {
-        min-height: 80px;
+        min-height: 50.4px; /* 10% smaller than 56px */
     }
 
     .mobile-cards .icon-container {
-        font-size: 2.3rem;
-        margin-bottom: 4px;
+        font-size: 1.449rem; /* 10% smaller than 1.61rem */
+        margin-bottom: 2.7px; /* 10% smaller than 3px */
     }
 
     .mobile-cards .card-title {
-        font-size: 0.55rem;
-        margin-bottom: 3px;
+        font-size: 0.3465rem; /* 10% smaller than 0.385rem */
+        margin-bottom: 1.8px; /* 10% smaller than 2px */
     }
 
     .mobile-cards .score {
-        font-size: 0.60rem;
+        font-size: 0.378rem; /* 10% smaller than 0.42rem */
     }
 }
 
@@ -446,6 +555,20 @@ body {
 
     .message-content p {
         font-size: 0.9rem;
+    }
+    
+    /* Mobile carousel adjustments for smaller screens */
+    .mobile-cards-container {
+        gap: 3px;
+    }
+    
+    .mobile-carousel-arrow {
+        width: 23.8px; /* 15% smaller than 28px */
+        height: 23.8px; /* 15% smaller than 28px */
+    }
+    
+    .mobile-carousel-arrow i {
+        font-size: 0.595rem; /* 15% smaller than 0.7rem */
     }
 } 
 .crop-carousel-container {
@@ -600,7 +723,7 @@ body {
 
 /* Hamburger Menu Styles */
 .hamburger-menu-button {
-    position: fixed;
+    position: absolute;
     top: 16px;
     left: 16px;
     width: 40px;
@@ -811,3 +934,5 @@ body {
         width: 240px;
     }
 }
+
+

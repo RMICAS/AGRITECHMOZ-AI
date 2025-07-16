@@ -10,6 +10,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const rightArrow = document.getElementById('rightArrow');
     const cropsSlider = document.getElementById('cropsSlider');
     
+    // Mobile carousel elements
+    const mobileLeftArrow = document.getElementById('mobileLeftArrow');
+    const mobileRightArrow = document.getElementById('mobileRightArrow');
+    const mobileCardsContainer = document.querySelector('.cards-scroll-container');
+    
+
+    
     // Hamburger menu elements
     const hamburgerButton = document.getElementById('hamburgerButton');
     const hamburgerSidebar = document.getElementById('hamburgerSidebar');
@@ -33,6 +40,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let isRateLimited = false;
     let sessionStarted = false;
     
+    // Mobile carousel variables
+    let mobileCurrentPosition = 0;
+    const mobileCards = ['sowing', 'growth', 'harvest', 'financial'];
+    const mobileCardsPerView = 2;
+    
     // Counter management for predefined questions
     let questionCounters = {
         sowing: 10,
@@ -48,6 +60,45 @@ document.addEventListener('DOMContentLoaded', function() {
             questionCounters = JSON.parse(savedCounters);
         }
         updateAllCounters();
+    }
+    
+    // Mobile carousel navigation functions
+    function updateMobileCarouselPosition() {
+        if (!mobileCardsContainer) return;
+        
+        const cardWidth = mobileCardsContainer.querySelector('.card').offsetWidth + 10; // 10px for margin
+        const scrollPosition = mobileCurrentPosition * cardWidth * mobileCardsPerView;
+        
+        mobileCardsContainer.scrollTo({
+            left: scrollPosition,
+            behavior: 'smooth'
+        });
+        
+        updateMobileArrowStates();
+    }
+    
+    function updateMobileArrowStates() {
+        if (!mobileLeftArrow || !mobileRightArrow) {
+            return;
+        }
+        
+        mobileLeftArrow.disabled = mobileCurrentPosition <= 0;
+        mobileRightArrow.disabled = mobileCurrentPosition >= Math.ceil(mobileCards.length / mobileCardsPerView) - 1;
+    }
+    
+    function mobileNextSlide() {
+        const maxPosition = Math.ceil(mobileCards.length / mobileCardsPerView) - 1;
+        if (mobileCurrentPosition < maxPosition) {
+            mobileCurrentPosition++;
+            updateMobileCarouselPosition();
+        }
+    }
+    
+    function mobilePrevSlide() {
+        if (mobileCurrentPosition > 0) {
+            mobileCurrentPosition--;
+            updateMobileCarouselPosition();
+        }
     }
     
     // Update counter display for a specific category
@@ -126,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check if this is the first interaction of the session
     function checkFirstInteraction() {
         if (!sessionStarted && chatMessages.children.length === 0) {
-            addMessage("Olá e bem-vindo ao AgritechMoz Chat! Sou o teu parceiro agrícola moçambicano, aqui para ajudar-te em qualquer etapa das tuas actividades agrícolas. Diz-me qual a cultura e a fase, e começamos já!", false);
+            // Welcome message removed - chat starts without initial message
             sessionStarted = true;
         }
     }
@@ -307,13 +358,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Function to add a new message
-    function addMessage(message, isUser = false, isError = false) {
+    function addMessage(message, isUser = false, isError = false, isWelcome = false) {
         if (chatMessages.children.length === 0) {
             chatMessages.classList.add('visible');
         }
 
         const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'} ${isError ? 'error-message' : ''}`;
+        messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'} ${isError ? 'error-message' : ''} ${isWelcome ? 'welcome-message' : ''}`;
         
         // Format the message to convert ** to <strong> tags
         const formattedMessage = formatMessage(message);
@@ -495,7 +546,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Event listeners for carousel navigation
+        // Event listeners for carousel navigation
     leftArrow.addEventListener('click', () => {
         const visibleCount = getVisibleCropsCount();
         currentPosition -= visibleCount;
@@ -510,7 +561,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateCarouselPosition();
         }
     });
-    
+
     rightArrow.addEventListener('click', () => {
         const visibleCount = getVisibleCropsCount();
         currentPosition += visibleCount;
@@ -525,6 +576,15 @@ document.addEventListener('DOMContentLoaded', function() {
             updateCarouselPosition();
         }
     });
+    
+    // Mobile carousel event listeners
+    if (mobileLeftArrow) {
+        mobileLeftArrow.addEventListener('click', mobilePrevSlide);
+    }
+    
+    if (mobileRightArrow) {
+        mobileRightArrow.addEventListener('click', mobileNextSlide);
+    }
     
     window.addEventListener('resize', () => {
         visibleCrops = getVisibleCropsCount();
@@ -548,6 +608,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize counters on page load with a small delay to ensure DOM is ready
     setTimeout(() => {
         initializeCounters();
+            // Initialize mobile carousel
+    if (mobileCardsContainer) {
+        updateMobileArrowStates();
+    }
     }, 100);
     
     // ... All your other initial setup functions and event listeners ...
