@@ -408,7 +408,7 @@ document.addEventListener('DOMContentLoaded', function() {
             card.style.cursor = 'wait';
             
             // NEW: Fetch predefined Q&A from your Python backend
-            const response = await fetch(`/ai/api/predefined?crop=${selectedCrop}&stage=${category}`);
+            const response = await fetch(`/api/predefined?crop=${selectedCrop}&stage=${category}`);
             const data = await response.json();
             
             if (response.ok) {
@@ -516,7 +516,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         try {
             // NEW: Fetch AI response from your Python backend
-            const response = await fetch('/ai/api/send_message', {
+            const response = await fetch('/api/send_message', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

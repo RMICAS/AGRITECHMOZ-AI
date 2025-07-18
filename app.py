@@ -14,7 +14,7 @@ load_dotenv()
 
 print(f"--- Is Gemini API Key Loaded? -> {os.getenv('GEMINI_API_KEY')}")
 
-app = Flask(__name__, static_folder='static', static_url_path='/ai/static')
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 # Configuration
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
@@ -24,16 +24,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialize database
 db.init_app(app)
 
-# Create Blueprint for /ai prefix
-from flask import Blueprint
-ai_bp = Blueprint('ai', __name__, url_prefix='/ai')
-
-@ai_bp.route('/')
+@app.route('/')
 def index():
     """Rota principal - mostra a interface do chat"""
     return render_template('index.html')
 
-@ai_bp.route('/api/predefined', methods=['GET'])
+@app.route('/api/predefined', methods=['GET'])
 def get_predefined_qa():
     """Obter perguntas e respostas pré-definidas com base na cultura e fase"""
     try:
@@ -55,7 +51,7 @@ def get_predefined_qa():
         app.logger.error(f"Erro no endpoint de perguntas e respostas pré-definidas: {str(e)}")
         return jsonify({'error': 'Erro interno do servidor.'}), 500
 
-@ai_bp.route('/api/send_message', methods=['POST'])
+@app.route('/api/send_message', methods=['POST'])
 def send_message():
     """Enviar mensagem para a IA Gemini e obter resposta"""
     try:
@@ -79,18 +75,10 @@ def send_message():
         app.logger.error(f"Erro no endpoint de envio de mensagem: {str(e)}")
         return jsonify({'error': 'Erro interno do servidor.'}), 500
 
-@ai_bp.route('/api/health', methods=['GET'])
+@app.route('/api/health', methods=['GET'])
 def health_check():
     """Endpoint de verificação de saúde"""
     return jsonify({'status': 'saudável', 'message': 'A API do AgritechMoz Chat está a funcionar'})
-
-# Register the blueprint
-app.register_blueprint(ai_bp)
-
-# Redirect from /ai to /ai/ (after blueprint registration)
-@app.route('/ai')
-def redirect_ai():
-    return redirect('/ai/')
 
 # Gestores de erros
 @app.errorhandler(404)
