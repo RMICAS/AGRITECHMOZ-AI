@@ -138,25 +138,25 @@ AgritechMoz-Chat/
 
 ## Agricultural Categories
 
-### 🌱 Sowing
+### Sowing
 - Planting time recommendations
 - Soil preparation guidance
 - Crop-specific spacing advice
 - Regional variety recommendations
 
-### 🌿 Growth
+### Growth
 - Irrigation schedules
 - Pest control methods
 - Fertilization guidance
 - Plant health monitoring
 
-### 🚜 Harvest
+### Harvest
 - Harvest timing indicators
 - Post-harvest handling
 - Storage recommendations
 - Quality control measures
 
-### 💰 Financial Analysis
+### Financial Analysis
 - Cost calculations
 - ROI estimations
 - Market pricing guidance
