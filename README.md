@@ -65,7 +65,7 @@ cp .env.example .env
 
 5. **Run the application**:
 ```bash
-python run.py
+python app.py
 ```
 
 6. **Access the application**:
@@ -75,7 +75,7 @@ python run.py
 
 ```
 AgritechMoz-Chat/
-├── run.py                 # Main Flask application
+├── app.py                 # Main Flask application
 ├── models.py              # Database models
 ├── helpers.py             # Helper functions (rate limiting, AI calls)
 ├── requirements.txt       # Python dependencies

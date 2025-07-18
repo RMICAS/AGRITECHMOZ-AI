@@ -5,8 +5,8 @@ import os
 sys.path.insert(0, os.path.dirname(__file__))
 
 try:
-    # Import the Flask app from run.py
-    from run import app
+    # Import the Flask app from app.py
+    from app import app
     
     # For cPanel hosting, we need to expose the app as 'application'
     application = app

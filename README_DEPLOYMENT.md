@@ -9,7 +9,7 @@
 
 Your application should have these key files:
 - `passenger_wsgi.py` - WSGI entry point for cPanel
-- `run.py` - Main Flask application
+- `app.py` - Main Flask application
 - `requirements.txt` - Python dependencies
 - `.env` - Environment variables (create this file)
 
@@ -49,7 +49,7 @@ The application will automatically create the SQLite database when it starts. Ma
 ### Debug Steps:
 
 1. Check the error logs in cPanel
-2. Test the import locally: `python -c "from run import app; print('OK')"`
+2. Test the import locally: `python -c "from app import app; print('OK')"`
 3. Verify all dependencies are installed
 4. Check file permissions
 
