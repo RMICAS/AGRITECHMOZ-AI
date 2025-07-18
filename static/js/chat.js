@@ -160,9 +160,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.innerWidth <= 430) {
             return 2;
         } else if (window.innerWidth <= 576) {
-            return 3;
+            return 2;
         } else if (window.innerWidth <= 768) {
-            return 4;
+            return 2;
         } else {
             return 5;
         }
@@ -842,53 +842,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Enhanced crop carousel for mobile
-    function addCropCarouselTouchSupport() {
-        if (!cropsSlider) return;
-        
-        let startX = 0;
-        let currentX = 0;
-        let isDragging = false;
-        
-        cropsSlider.addEventListener('touchstart', function(e) {
-            startX = e.touches[0].clientX;
-            isDragging = true;
-            this.style.transition = 'none';
-        });
-        
-        cropsSlider.addEventListener('touchmove', function(e) {
-            if (!isDragging) return;
-            e.preventDefault();
-            currentX = e.touches[0].clientX;
-            const diff = currentX - startX;
-            this.style.transform = `translateX(${diff}px)`;
-        });
-        
-        cropsSlider.addEventListener('touchend', function(e) {
-            if (!isDragging) return;
-            isDragging = false;
-            this.style.transition = 'transform 0.3s ease';
-            this.style.transform = '';
-            
-            const diff = currentX - startX;
-            const threshold = 50;
-            
-            if (Math.abs(diff) > threshold) {
-                if (diff > 0) {
-                    prevSlide();
-                } else {
-                    nextSlide();
-                }
-            }
-        });
-    }
-
     // Initialize mobile enhancements
     function initMobileEnhancements() {
         detectMobile();
         addTouchSupport();
         addMobileCarouselTouchSupport();
-        addCropCarouselTouchSupport();
         
         // Handle keyboard visibility
         window.addEventListener('resize', adjustForKeyboard);
