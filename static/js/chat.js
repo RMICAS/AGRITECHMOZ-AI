@@ -614,5 +614,376 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     }, 100);
     
-    // ... All your other initial setup functions and event listeners ...
+    // Mobile UX Enhancements
+    let isMobile = window.innerWidth <= 768;
+    let isLandscape = window.innerWidth > window.innerHeight;
+    let keyboardVisible = false;
+    let viewportHeight = window.innerHeight;
+
+    // Detect mobile device
+    function detectMobile() {
+        isMobile = window.innerWidth <= 768;
+        isLandscape = window.innerWidth > window.innerHeight;
+        viewportHeight = window.innerHeight;
+    }
+
+    // Handle viewport changes
+    window.addEventListener('resize', function() {
+        detectMobile();
+        adjustForKeyboard();
+    });
+
+    // Keyboard handling for mobile
+    function adjustForKeyboard() {
+        if (isMobile) {
+            const currentHeight = window.innerHeight;
+            const heightDifference = viewportHeight - currentHeight;
+            
+            if (heightDifference > 150) {
+                keyboardVisible = true;
+                document.body.style.setProperty('--keyboard-height', `${heightDifference}px`);
+            } else {
+                keyboardVisible = false;
+                document.body.style.removeProperty('--keyboard-height');
+            }
+        }
+    }
+
+    // Enhanced touch handling
+    function addTouchSupport() {
+        if (isMobile) {
+            // Add touch feedback to cards
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                });
+                
+                card.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                });
+                
+                card.addEventListener('touchcancel', function() {
+                    this.style.transform = '';
+                });
+            });
+            
+            // Add touch feedback to crop buttons
+            const cropButtons = document.querySelectorAll('.crop-btn');
+            cropButtons.forEach(btn => {
+                btn.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.95)';
+                });
+                
+                btn.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                });
+                
+                btn.addEventListener('touchcancel', function() {
+                    this.style.transform = '';
+                });
+            });
+        }
+    }
+
+    // Improved loading states
+    function setLoadingState(loading) {
+        const sendButton = document.getElementById('sendButton');
+        const buttonIcon = sendButton.querySelector('.fas.fa-arrow-up');
+        const buttonLoading = sendButton.querySelector('.button-loading');
+        
+        if (loading) {
+            sendButton.classList.add('loading');
+            sendButton.disabled = true;
+            chatInput.disabled = true;
+        } else {
+            sendButton.classList.remove('loading');
+            sendButton.disabled = false;
+            chatInput.disabled = false;
+        }
+    }
+
+    // Enhanced message display for mobile
+    function addMessage(message, isUser = false, isError = false, isWelcome = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'} ${isError ? 'error-message' : ''}`;
+        
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        
+        const icon = document.createElement('i');
+        icon.className = `fas ${isUser ? 'fa-user' : 'fa-robot'} message-icon`;
+        
+        const text = document.createElement('p');
+        text.innerHTML = formatMessage(message);
+        
+        messageContent.appendChild(icon);
+        messageContent.appendChild(text);
+        messageDiv.appendChild(messageContent);
+        
+        chatMessages.appendChild(messageDiv);
+        
+        // Enhanced scroll behavior for mobile
+        if (isMobile) {
+            setTimeout(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 100);
+        } else {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Add haptic feedback on mobile (if supported)
+        if (isMobile && 'vibrate' in navigator) {
+            navigator.vibrate(50);
+        }
+        
+        // Switch logos on mobile after first user message
+        if (isUser && isMobile) {
+            switchLogosOnMobile();
+        }
+    }
+
+    // Improved send function with better mobile handling
+    async function handleSend() {
+        const message = chatInput.value.trim();
+        if (!message || isRateLimited) return;
+        
+        // Clear input immediately for better UX
+        chatInput.value = '';
+        
+        // Add user message
+        addMessage(message, true);
+        
+        // Show chat messages if hidden
+        if (!chatMessages.classList.contains('visible')) {
+            chatMessages.classList.add('visible');
+        }
+        
+        // Set loading state
+        setLoadingState(true);
+        
+        try {
+            const response = await fetch('/api/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                addMessage(data.response, false);
+            } else {
+                addMessage(data.error || 'Erro ao enviar mensagem. Tente novamente.', false, true);
+                if (response.status === 429) {
+                    isRateLimited = true;
+                    setTimeout(() => {
+                        isRateLimited = false;
+                    }, 60000); // 1 minute
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            addMessage('Erro de conexão. Verifique sua internet e tente novamente.', false, true);
+        } finally {
+            setLoadingState(false);
+            chatInput.focus();
+        }
+    }
+
+    // Enhanced keyboard handling
+    function handleKeyPress(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            handleSend();
+        }
+    }
+
+    // Improved mobile carousel with touch gestures
+    function addMobileCarouselTouchSupport() {
+        if (!mobileCardsContainer) return;
+        
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        
+        mobileCardsContainer.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+            this.style.transition = 'none';
+        });
+        
+        mobileCardsContainer.addEventListener('touchmove', function(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            currentX = e.touches[0].clientX;
+            const diff = currentX - startX;
+            this.style.transform = `translateX(${diff}px)`;
+        });
+        
+        mobileCardsContainer.addEventListener('touchend', function(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            this.style.transition = 'transform 0.3s ease';
+            this.style.transform = '';
+            
+            const diff = currentX - startX;
+            const threshold = 50;
+            
+            if (Math.abs(diff) > threshold) {
+                if (diff > 0) {
+                    mobilePrevSlide();
+                } else {
+                    mobileNextSlide();
+                }
+            }
+        });
+    }
+
+    // Enhanced crop carousel for mobile
+    function addCropCarouselTouchSupport() {
+        if (!cropsSlider) return;
+        
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        
+        cropsSlider.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+            this.style.transition = 'none';
+        });
+        
+        cropsSlider.addEventListener('touchmove', function(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            currentX = e.touches[0].clientX;
+            const diff = currentX - startX;
+            this.style.transform = `translateX(${diff}px)`;
+        });
+        
+        cropsSlider.addEventListener('touchend', function(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            this.style.transition = 'transform 0.3s ease';
+            this.style.transform = '';
+            
+            const diff = currentX - startX;
+            const threshold = 50;
+            
+            if (Math.abs(diff) > threshold) {
+                if (diff > 0) {
+                    prevSlide();
+                } else {
+                    nextSlide();
+                }
+            }
+        });
+    }
+
+    // Initialize mobile enhancements
+    function initMobileEnhancements() {
+        detectMobile();
+        addTouchSupport();
+        addMobileCarouselTouchSupport();
+        addCropCarouselTouchSupport();
+        
+        // Handle keyboard visibility
+        window.addEventListener('resize', adjustForKeyboard);
+        
+        // Add keyboard event listeners
+        chatInput.addEventListener('keypress', handleKeyPress);
+        
+        // Initialize logo elements
+        const logoSection = document.getElementById('logoSection');
+        const smallLogo = document.getElementById('smallLogo');
+        
+        // Reset logo state on page load
+        if (logoSection && smallLogo) {
+            logoSection.classList.remove('hidden');
+            smallLogo.classList.remove('visible');
+        }
+        
+        // Prevent zoom on double tap for mobile
+        if (isMobile) {
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+        }
+    }
+
+    // Enhanced card click handling for mobile
+    async function handleCardClick(card) {
+        if (!selectedCrop) {
+            addMessage("Por favor, seleciona uma cultura primeiro.", false, true);
+            return;
+        }
+        
+        const category = card.getAttribute('data-category');
+        if (!category || questionCounters[category] <= 0) {
+            addMessage("Não há mais perguntas disponíveis para esta categoria.", false, true);
+            return;
+        }
+        
+        // Add haptic feedback
+        if (isMobile && 'vibrate' in navigator) {
+            navigator.vibrate(30);
+        }
+        
+        // Show chat messages if hidden
+        if (!chatMessages.classList.contains('visible')) {
+            chatMessages.classList.add('visible');
+        }
+        
+        // Set loading state
+        setLoadingState(true);
+        
+        try {
+            const response = await fetch(`/api/predefined?crop=${selectedCrop}&stage=${category}`);
+            const data = await response.json();
+            
+            if (response.ok) {
+                addMessage(data.prompt, true);
+                addMessage(data.answer, false);
+                decreaseCounter(category);
+            } else {
+                addMessage(data.error || 'Erro ao obter pergunta pré-definida.', false, true);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            addMessage('Erro de conexão. Verifique sua internet e tente novamente.', false, true);
+        } finally {
+            setLoadingState(false);
+        }
+    }
+
+    // Logo switching functionality
+    let firstMessageSent = false;
+    const logoSection = document.getElementById('logoSection');
+    const smallLogo = document.getElementById('smallLogo');
+    
+    // Function to switch logos on mobile after first message
+    function switchLogosOnMobile() {
+        if (isMobile && !firstMessageSent) {
+            firstMessageSent = true;
+            
+            // Hide entire logo section with animation
+            logoSection.classList.add('hidden');
+            
+            // Show small logo with animation
+            setTimeout(() => {
+                smallLogo.classList.add('visible');
+            }, 300); // Wait for logo section to fade out
+        }
+    }
+
+    // Initialize everything when DOM is loaded
+    initMobileEnhancements();
 });

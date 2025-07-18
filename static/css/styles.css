@@ -255,7 +255,7 @@ body {
 .mobile-cards {
     display: none;
     padding: 0 5%;
-    margin-bottom: 30px;
+    margin-bottom: 5px;
 }
 
 .mobile-cards-container {
@@ -473,7 +473,7 @@ body {
 
     .logo {
         height: 48px;
-        margin: 32px 0;
+        margin: 5px 0;
     }
 
     .card {
@@ -545,8 +545,10 @@ body {
     }
 
     .chat-messages {
-        margin: 10px;
-        min-height: 250px;
+        margin: 8px;
+        min-height: 35vh;
+        max-height: 45vh;
+        padding: 12px;
     }
 
     .message-content {
@@ -575,7 +577,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 30px;
+    margin-bottom: 0px;
     position: relative;
     width: 100%;
 }
@@ -934,5 +936,359 @@ body {
         width: 240px;
     }
 }
+
+/* Mobile Status Indicator */
+.mobile-status-indicator {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(46, 125, 50, 0.1);
+    border-radius: 20px;
+    margin: 10px auto;
+    width: fit-content;
+    font-size: 0.85rem;
+    color: #2E7D32;
+    font-weight: 500;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #2E7D32;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 768px) {
+    .mobile-status-indicator {
+        display: flex;
+    }
+}
+
+/* Enhanced mobile touch targets */
+@media (max-width: 768px) {
+    .card {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+    
+    .crop-btn {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+    
+    .send-button {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+    
+    /* Improved mobile scrolling */
+    .chat-messages {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+        min-height: 40vh;
+        max-height: 50vh;
+        margin: 10px;
+        padding: 15px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    }
+    
+    .cards-scroll-container {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+    
+    /* Better mobile typography */
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+    
+    /* Mobile-specific animations */
+    .card {
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    
+    .card:active {
+        transform: scale(0.96);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Improved mobile input */
+    .chat-input-container input {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        border-radius: 20px;
+    }
+    
+    .chat-input-container input::-webkit-search-decoration,
+    .chat-input-container input::-webkit-search-cancel-button,
+    .chat-input-container input::-webkit-search-results-button,
+    .chat-input-container input::-webkit-search-results-decoration {
+        display: none;
+    }
+}
+
+/* Mobile landscape optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+    .mobile-status-indicator {
+        display: none;
+    }
+    
+    .logo {
+        height: 40px;
+        margin: 10px 0;
+    }
+    
+    .container-fluid {
+        padding-top: 5px;
+    }
+    
+    .chat-messages {
+        min-height: 30vh;
+        max-height: 40vh;
+        margin: 8px;
+        padding: 12px;
+    }
+    
+    .chat-input-container {
+        bottom: 10px;
+    }
+}
+
+/* Mobile performance optimizations */
+@media (max-width: 768px) {
+    .card,
+    .crop-btn,
+    .send-button {
+        will-change: transform;
+    }
+    
+    .chat-messages {
+        will-change: scroll-position;
+    }
+    
+    /* Reduce motion for better performance */
+    .card:hover {
+        transform: none;
+    }
+    
+    .crop-btn:hover {
+        transform: none;
+    }
+}
+
+/* Mobile accessibility improvements */
+@media (max-width: 768px) {
+    .card:focus-visible,
+    .crop-btn:focus-visible,
+    .send-button:focus-visible {
+        outline: 2px solid #2E7D32;
+        outline-offset: 2px;
+    }
+    
+    /* Better contrast for mobile */
+    .message-content {
+        color: inherit;
+    }
+    
+    .bot-message .message-content {
+        color: #2c3e50;
+    }
+    
+    .user-message .message-content {
+        color: white;
+    }
+}
+
+/* Focus indicators for keyboard navigation */
+.card:focus,
+.crop-btn:focus,
+.send-button:focus,
+.hamburger-menu-button:focus {
+    outline: 2px solid #2E7D32;
+    outline-offset: 2px;
+}
+
+/* Loading states for better UX */
+.send-button.loading {
+    background-color: #6c757d;
+    pointer-events: none;
+}
+
+.send-button.loading .fas.fa-arrow-up {
+    display: none;
+}
+
+.send-button.loading .button-loading {
+    display: flex !important;
+}
+
+/* Improved scrollbar for mobile */
+.cards-scroll-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.cards-scroll-container::-webkit-scrollbar-thumb {
+    background: #2E7D32;
+    border-radius: 3px;
+}
+
+.cards-scroll-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+/* Touch feedback improvements */
+.card:active,
+.crop-btn:active,
+.send-button:active {
+    transform: scale(0.95);
+}
+
+/* Better visual hierarchy for mobile */
+.question-counter {
+    margin-top: 6px;
+}
+
+.counter-number {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2E7D32;
+}
+
+/* Enhanced crop carousel for mobile */
+@media (max-width: 768px) {
+    .crops-container {
+        width: 85%;
+    }
+    
+    .crop-btn {
+        margin: 0 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 120px;
+    }
+    
+    .carousel-arrow {
+        width: 36px;
+        height: 36px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+}
+
+@media (max-width: 375px) {
+    .crops-container {
+        width: 80%;
+    }
+    
+    .crop-btn {
+        margin: 0 2px;
+        max-width: 100px;
+        font-size: 0.8rem;
+        padding: 10px 12px;
+    }
+    
+    .carousel-arrow {
+        width: 32px;
+        height: 32px;
+    }
+} 
+
+/* Small Logo Icon for Mobile */
+.logo-icon {
+    display: none;
+    height: 32px;
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 1001;
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: scale(0.8);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.logo-icon.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Mobile logo switching */
+@media (max-width: 768px) {
+    .logo-icon {
+        display: block;
+    }
+    
+    /* Show small logo after first message */
+    .logo-icon.visible {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+    .logo-icon {
+        top: 10px;
+        right: 10px;
+        height: 28px;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 375px) {
+    .logo-icon {
+        height: 28px;
+        top: 12px;
+        right: 12px;
+    }
+}
+
+/* Logo transition improvements */
+.logo {
+    transition: all 0.3s ease;
+}
+
+/* Hide entire logo section after first message */
+#logoSection {
+    transition: all 0.3s ease;
+}
+
+#logoSection.hidden {
+    opacity: 0;
+    transform: scale(0.8);
+    pointer-events: none;
+    height: 0;
+    margin: 0;
+    overflow: hidden;
+} 
+
 
 

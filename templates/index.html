@@ -2,8 +2,22 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgritechMoz Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#2E7D32">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="AgritechMoz Chat">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <title>AgritechMoz AI</title>
+    
+    <!-- Touch Icons -->
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/Agritech-logo-full-green.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='images/Agritech-logo-full-green.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='images/Agritech-logo-full-green.png') }}">
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
@@ -51,14 +65,21 @@
     <!-- Overlay for hamburger menu -->
     <div class="hamburger-overlay" id="hamburgerOverlay"></div>
 
-
+    <!-- Small Logo Icon (Mobile Only) -->
+    <img src="{{ url_for('static', filename='images/agritech-logo-icon.png') }}" alt="AgritechMoz" class="logo-icon" id="smallLogo">
 
     <div class="container-fluid">
+        <!-- Mobile Status Indicator -->
+        <div class="mobile-status-indicator" id="mobileStatusIndicator">
+            <div class="status-dot"></div>
+            <span class="status-text">Conectado</span>
+        </div>
+
         <!-- Logo Section -->
-        <div class="row justify-content-center my-4">
+        <div class="row justify-content-center my-4" id="logoSection">
             <div class="col-md-6 text-center">
                 <a href="/" class="logo-link">
-                    <img src="{{ url_for('static', filename='images/Agritech-logo-full-green.png') }}" alt="AgritechMoz" class="logo">
+                    <img src="{{ url_for('static', filename='images/Agritech-logo-full-green.png') }}" alt="AgritechMoz" class="logo" id="mainLogo">
                 </a>
             </div>
         </div>
@@ -219,8 +240,16 @@
 
                 <!-- Chat Input -->
                 <div class="chat-input-container">
-                    <input type="text" class="form-control" placeholder="Pergunta-me qualquer coisa sobre agricultura" id="chatInput">
-                    <button class="send-button" id="sendButton">
+                    <input type="text" 
+                           class="form-control" 
+                           placeholder="Pergunta-me qualquer coisa sobre agricultura" 
+                           id="chatInput"
+                           autocomplete="off"
+                           autocorrect="off"
+                           autocapitalize="sentences"
+                           spellcheck="true"
+                           enterkeyhint="send">
+                    <button class="send-button" id="sendButton" type="button" aria-label="Enviar mensagem">
                         <i class="fas fa-arrow-up"></i>
                         <div class="button-loading d-none">
                             <i class="fas fa-spinner fa-spin"></i>
