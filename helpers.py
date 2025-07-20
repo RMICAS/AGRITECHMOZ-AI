@@ -45,7 +45,7 @@ def check_and_update_limit(ip_address):
             usage_tracker.last_request_date = today
         else:
             # Same day, check limit
-            if usage_tracker.message_count >= 10:
+            if usage_tracker.message_count >= 100:
                 return False
             # Increment count
             usage_tracker.message_count += 1

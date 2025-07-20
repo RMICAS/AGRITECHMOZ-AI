@@ -522,21 +522,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if this is a predefined question
         let isPredefinedQuestion = false;
         if (currentPredefinedCategory && selectedCrop) {
-            // Check if the message matches a predefined question for the current category
-            try {
-                const predefinedResponse = await fetch(`/api/predefined?crop=${selectedCrop}&stage=${currentPredefinedCategory}`);
-                const predefinedData = await predefinedResponse.json();
-                
-                if (predefinedResponse.ok && predefinedData.prompt === message) {
-                    isPredefinedQuestion = true;
-                    // Decrease counter for predefined questions
-                    if (decreaseCounter(currentPredefinedCategory)) {
-                        // Clear the current predefined category
-                        currentPredefinedCategory = null;
-                    }
-                }
-            } catch (error) {
-                console.error('Error checking predefined question:', error);
+            // If we have a current predefined category, this is likely a predefined question
+            isPredefinedQuestion = true;
+            // Decrease counter for predefined questions
+            if (decreaseCounter(currentPredefinedCategory)) {
+                // Clear the current predefined category
+                currentPredefinedCategory = null;
             }
         }
 
@@ -794,21 +785,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if this is a predefined question
         let isPredefinedQuestion = false;
         if (currentPredefinedCategory && selectedCrop) {
-            // Check if the message matches a predefined question for the current category
-            try {
-                const predefinedResponse = await fetch(`/api/predefined?crop=${selectedCrop}&stage=${currentPredefinedCategory}`);
-                const predefinedData = await predefinedResponse.json();
-                
-                if (predefinedResponse.ok && predefinedData.prompt === message) {
-                    isPredefinedQuestion = true;
-                    // Decrease counter for predefined questions
-                    if (decreaseCounter(currentPredefinedCategory)) {
-                        // Clear the current predefined category
-                        currentPredefinedCategory = null;
-                    }
-                }
-            } catch (error) {
-                console.error('Error checking predefined question:', error);
+            // If we have a current predefined category, this is likely a predefined question
+            isPredefinedQuestion = true;
+            // Decrease counter for predefined questions
+            if (decreaseCounter(currentPredefinedCategory)) {
+                // Clear the current predefined category
+                currentPredefinedCategory = null;
             }
         }
         
