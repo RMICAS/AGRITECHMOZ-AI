@@ -503,68 +503,7 @@ document.addEventListener('DOMContentLoaded', function() {
         chatInput.placeholder = 'Limite diário atingido. Tenta novamente amanhã.';
     }
 
-    // UPDATED: Handle send button click to fetch from the backend
-    async function handleSend() {
-        const message = chatInput.value.trim();
-        if (!message) return;
 
-        // Check for first interaction
-        checkFirstInteraction();
-
-        if (isRateLimited) {
-            addMessage("Atingiu o limite diário de mensagens. Tenta novamente amanhã.", false, true);
-            return;
-        }
-
-        addMessage(message, true);
-        chatInput.value = '';
-
-        // Check if this is a predefined question
-        let isPredefinedQuestion = false;
-        if (currentPredefinedCategory && selectedCrop) {
-            // If we have a current predefined category, this is likely a predefined question
-            isPredefinedQuestion = true;
-            // Decrease counter for predefined questions
-            if (decreaseCounter(currentPredefinedCategory)) {
-                // Clear the current predefined category
-                currentPredefinedCategory = null;
-            }
-        }
-
-        buttonIcon.style.display = 'none';
-        buttonLoading.classList.remove('d-none');
-
-        try {
-            // NEW: Fetch AI response from your Python backend
-            const response = await fetch('/api/send_message', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ message: message }) // Your backend expects a 'message' key
-            });
-            
-            const data = await response.json();
-            
-            if (response.ok) {
-                addMessage(data.response, false); // Your backend returns a 'response' key
-            } else {
-                if (response.status === 429) { // Check for rate limit
-                    isRateLimited = true;
-                    addMessage(data.error, false, true);
-                    disableChatInput();
-                } else {
-                    addMessage(data.error || 'Falha ao obter resposta da IA. Tenta novamente.', false, true);
-                }
-            }
-        } catch (error) {
-            console.error('Error sending message:', error);
-            addMessage('Erro de rede. Verifica a tua ligação e tenta novamente.', false, true);
-        } finally {
-            buttonIcon.style.display = 'inline-block';
-            buttonLoading.classList.add('d-none');
-        }
-    }
 
         // Event listeners for carousel navigation
     leftArrow.addEventListener('click', () => {
@@ -611,11 +550,26 @@ document.addEventListener('DOMContentLoaded', function() {
         updateArrowStates();
     });
 
-    // Event listeners for chat (This is fine, no changes)
-    sendButton.addEventListener('click', handleSend);
+    // Event listeners for chat with improved handling
+    let isSending = false;
+    
+    sendButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (isSending || sendButton.disabled) return;
+        isSending = true;
+        handleSend().finally(() => {
+            isSending = false;
+        });
+    });
+    
     chatInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            handleSend();
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            if (isSending || sendButton.disabled) return;
+            isSending = true;
+            handleSend().finally(() => {
+                isSending = false;
+            });
         }
     });
     
@@ -716,10 +670,16 @@ document.addEventListener('DOMContentLoaded', function() {
             sendButton.classList.add('loading');
             sendButton.disabled = true;
             chatInput.disabled = true;
+            // Add visual feedback
+            if (buttonIcon) buttonIcon.style.display = 'none';
+            if (buttonLoading) buttonLoading.classList.remove('d-none');
         } else {
             sendButton.classList.remove('loading');
             sendButton.disabled = false;
             chatInput.disabled = false;
+            // Restore visual state
+            if (buttonIcon) buttonIcon.style.display = 'inline-block';
+            if (buttonLoading) buttonLoading.classList.add('d-none');
         }
     }
 
@@ -767,6 +727,9 @@ document.addEventListener('DOMContentLoaded', function() {
     async function handleSend() {
         const message = chatInput.value.trim();
         if (!message || isRateLimited) return;
+        
+        // Check for first interaction
+        checkFirstInteraction();
         
         // Clear input immediately for better UX
         chatInput.value = '';
@@ -825,13 +788,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Enhanced keyboard handling
-    function handleKeyPress(event) {
-        if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
-            handleSend();
-        }
-    }
+
 
     // Improved mobile carousel with touch gestures
     function addMobileCarouselTouchSupport() {
