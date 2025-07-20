@@ -64,10 +64,10 @@ def send_message():
         user_message = data['message'].strip()
         if not user_message:
             return jsonify({'error': 'A mensagem não pode estar vazia.'}), 400
-        ai_response = get_gemini_response(user_message)
+        visitor_id = hash_ip_address(ip_address)
+        ai_response = get_gemini_response(user_message, visitor_id)
         if ai_response is None:
             return jsonify({'error': 'Não foi possível obter resposta da IA. Tente novamente mais tarde.'}), 500
-        visitor_id = hash_ip_address(ip_address)
         log_message(visitor_id, 'user', user_message)
         log_message(visitor_id, 'assistant', ai_response)
         return jsonify({'response': ai_response, 'message': user_message})

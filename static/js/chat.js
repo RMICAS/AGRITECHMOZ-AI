@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let visibleCrops = getVisibleCropsCount();
     let isRateLimited = false;
     let sessionStarted = false;
+    let currentPredefinedCategory = null;
     
     // Mobile carousel variables
     let mobileCurrentPosition = 0;
@@ -52,6 +53,9 @@ document.addEventListener('DOMContentLoaded', function() {
         harvest: 10,
         financial: 10
     };
+    
+    // Total questions available (for display)
+    const totalQuestions = 10;
     
     // Initialize counters from localStorage if available
     function initializeCounters() {
@@ -107,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const counterElements = document.querySelectorAll(`#${category}-counter, #${category}-counter-mobile`);
         
         counterElements.forEach(element => {
-            element.textContent = counter;
+            element.textContent = `${counter}/${totalQuestions}`;
         });
         
         // Disable card if counter reaches 0
@@ -146,10 +150,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Reset all counters (for testing or new session)
     function resetCounters() {
         questionCounters = {
-            sowing: 10,
-            growth: 10,
-            harvest: 10,
-            financial: 10
+            sowing: totalQuestions,
+            growth: totalQuestions,
+            harvest: totalQuestions,
+            financial: totalQuestions
         };
         localStorage.setItem('questionCounters', JSON.stringify(questionCounters));
         updateAllCounters();
@@ -407,16 +411,20 @@ document.addEventListener('DOMContentLoaded', function() {
             card.style.opacity = '0.7';
             card.style.cursor = 'wait';
             
-            // NEW: Fetch predefined Q&A from your Python backend
+            // Fetch predefined Q&A from your Python backend
             const response = await fetch(`/api/predefined?crop=${selectedCrop}&stage=${category}`);
             const data = await response.json();
             
             if (response.ok) {
-                // Decrease counter only if the request was successful
-                if (decreaseCounter(category)) {
-                    addMessage(data.prompt, true);
-                    addMessage(data.answer, false);
-                }
+                // Store the category for this predefined question
+                currentPredefinedCategory = category;
+                
+                // Instead of automatically sending the message, put it in the chat input
+                chatInput.value = data.prompt;
+                chatInput.focus();
+                
+                // Show a hint message to the user
+                addMessage("Pergunta carregada! Clica em enviar para obter a resposta.", false);
             } else {
                 if (response.status === 429) { // Specifically check for the rate limit status code
                     isRateLimited = true;
@@ -510,6 +518,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
         addMessage(message, true);
         chatInput.value = '';
+
+        // Check if this is a predefined question
+        let isPredefinedQuestion = false;
+        if (currentPredefinedCategory && selectedCrop) {
+            // Check if the message matches a predefined question for the current category
+            try {
+                const predefinedResponse = await fetch(`/api/predefined?crop=${selectedCrop}&stage=${currentPredefinedCategory}`);
+                const predefinedData = await predefinedResponse.json();
+                
+                if (predefinedResponse.ok && predefinedData.prompt === message) {
+                    isPredefinedQuestion = true;
+                    // Decrease counter for predefined questions
+                    if (decreaseCounter(currentPredefinedCategory)) {
+                        // Clear the current predefined category
+                        currentPredefinedCategory = null;
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking predefined question:', error);
+            }
+        }
 
         buttonIcon.style.display = 'none';
         buttonLoading.classList.remove('d-none');
@@ -762,6 +791,27 @@ document.addEventListener('DOMContentLoaded', function() {
         // Set loading state
         setLoadingState(true);
         
+        // Check if this is a predefined question
+        let isPredefinedQuestion = false;
+        if (currentPredefinedCategory && selectedCrop) {
+            // Check if the message matches a predefined question for the current category
+            try {
+                const predefinedResponse = await fetch(`/api/predefined?crop=${selectedCrop}&stage=${currentPredefinedCategory}`);
+                const predefinedData = await predefinedResponse.json();
+                
+                if (predefinedResponse.ok && predefinedData.prompt === message) {
+                    isPredefinedQuestion = true;
+                    // Decrease counter for predefined questions
+                    if (decreaseCounter(currentPredefinedCategory)) {
+                        // Clear the current predefined category
+                        currentPredefinedCategory = null;
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking predefined question:', error);
+            }
+        }
+        
         try {
             const response = await fetch('/api/send_message', {
                 method: 'POST',
@@ -908,9 +958,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             if (response.ok) {
-                addMessage(data.prompt, true);
-                addMessage(data.answer, false);
-                decreaseCounter(category);
+                // Store the category for this predefined question
+                currentPredefinedCategory = category;
+                
+                // Instead of automatically sending the message, put it in the chat input
+                chatInput.value = data.prompt;
+                chatInput.focus();
+                
+                // Show a hint message to the user
+                addMessage("Pergunta carregada! Clica em enviar para obter a resposta.", false);
             } else {
                 addMessage(data.error || 'Erro ao obter pergunta pré-definida.', false, true);
             }

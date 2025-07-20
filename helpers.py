@@ -17,7 +17,12 @@ def check_and_update_limit(ip_address):
     """
     Check and update rate limit for a visitor
     Returns True if within limit, False if limit exceeded
+    Excludes IP address 172.20.10.5 from rate limiting
     """
+    # Exclude specific IP address from rate limiting
+    if ip_address == '172.20.10.5':
+        return True
+    
     visitor_id = hash_ip_address(ip_address)
     today = date.today()
     
@@ -40,7 +45,7 @@ def check_and_update_limit(ip_address):
             usage_tracker.last_request_date = today
         else:
             # Same day, check limit
-            if usage_tracker.message_count >= 50:
+            if usage_tracker.message_count >= 10:
                 return False
             # Increment count
             usage_tracker.message_count += 1
@@ -58,9 +63,31 @@ def log_message(visitor_id, role, content):
     db.session.add(message_log)
     db.session.commit()
 
-def get_gemini_response(prompt):
+def get_conversation_history(visitor_id, limit=10):
     """
-    Get response from Google Gemini AI
+    Get recent conversation history for a visitor
+    Returns a list of tuples (role, content) in chronological order
+    """
+    try:
+        # Get the most recent messages for this visitor
+        messages = MessageLog.query.filter_by(visitor_id=visitor_id)\
+            .order_by(MessageLog.timestamp.desc())\
+            .limit(limit)\
+            .all()
+        
+        # Reverse to get chronological order and format for context
+        conversation_history = []
+        for msg in reversed(messages):
+            conversation_history.append((msg.role, msg.content))
+        
+        return conversation_history
+    except Exception as e:
+        current_app.logger.error(f"Error getting conversation history: {str(e)}")
+        return []
+
+def get_gemini_response(prompt, visitor_id=None):
+    """
+    Get response from Google Gemini AI with conversation context
     Returns the AI response or None if error occurs
     """
     try:
@@ -71,6 +98,18 @@ def get_gemini_response(prompt):
         # Configure Gemini
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-2.0-flash')
+        
+        # Get conversation history if visitor_id is provided
+        conversation_context = ""
+        if visitor_id:
+            conversation_history = get_conversation_history(visitor_id, limit=6)  # Last 6 messages (3 exchanges)
+            if conversation_history:
+                conversation_context = "\n\nHistórico da Conversa:\n"
+                for role, content in conversation_history:
+                    if role == 'user':
+                        conversation_context += f"Utilizador: {content}\n"
+                    else:
+                        conversation_context += f"Assistente: {content}\n"
         
         # Cria um prompt para respostas agrícolas e gerais em português de Portugal
         agricultural_context = f"""
@@ -85,6 +124,7 @@ REGRAS OBRIGATÓRIAS:
 4. Usa listas com bullet points quando apropriado
 5. Mantém o contexto da conversa ao longo da sessão
 6. NÃO te apresentes novamente se já foste apresentado na sessão atual
+7. REFERENCIA o contexto anterior quando relevante (ex: "quanto à banana que mencionaste...")
 
 Objetivo Principal:
 - Para perguntas agrícolas: Dá conselhos práticos adaptados à realidade de Moçambique
@@ -96,6 +136,7 @@ Estilo de Comunicação:
 - Usa linguagem simples e informal
 - Foca-te em conselhos práticos e exemplos locais
 - Mantém consistência no tom e estilo ao longo da conversa
+- REFERENCIA o contexto anterior quando relevante
 
 Formatação de Listas:
 - Quando criares listas, cada item deve começar numa linha nova
@@ -113,9 +154,11 @@ Formatação de Listas:
 - NUNCA coloques múltiplos itens na mesma linha
 - SEMPRE usa • (ponto médio) para bullet points, NÃO asteriscos (*)
 
+{conversation_context}
+
 Pergunta do Utilizador: {prompt}
 
-RESPONDE COM MÁXIMO 120 PALAVRAS em português de Moçambique.
+RESPONDE COM MÁXIMO 120 PALAVRAS em português de Moçambique, mantendo o contexto da conversa.
         """
         
         response = model.generate_content(agricultural_context)

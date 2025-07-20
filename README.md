@@ -5,7 +5,7 @@ An interactive agricultural chatbot designed specifically for Mozambican farmers
 ## Features
 
 - **Flask Backend**: Robust server-side processing with SQLAlchemy database
-- **Anonymous Rate Limiting**: 15 messages per day per IP address (hashed for privacy)
+- **Anonymous Rate Limiting**: 10 messages per day per IP address (hashed for privacy, excludes 172.20.10.5)
 - **Google Gemini AI Integration**: Advanced AI responses for agricultural queries
 - **Predefined Q&A System**: Curated agricultural advice for specific crops and stages
 - **Interactive Card-based Interface**: Four agricultural stages (Sowing, Growth, Harvest, Financial)
@@ -107,13 +107,13 @@ AgritechMoz-Chat/
   - `crop` (string): Crop name (e.g., "tomato", "maize")
   - `stage` (string): Agricultural stage (e.g., "sowing", "growth", "harvest", "financial")
 - **Response**: JSON with prompt and answer
-- **Rate Limited**: Yes (15 messages/day)
+- **Rate Limited**: Yes (10 messages/day, excludes 172.20.10.5)
 
 ### `POST /api/send_message`
 - **Purpose**: Send message to Gemini AI
 - **Body**: JSON with `message` field
 - **Response**: JSON with AI response
-- **Rate Limited**: Yes (15 messages/day)
+- **Rate Limited**: Yes (10 messages/day, excludes 172.20.10.5)
 
 ### `GET /api/health`
 - **Purpose**: Health check endpoint
@@ -131,7 +131,8 @@ AgritechMoz-Chat/
 
 ## Rate Limiting
 
-- **Limit**: 15 messages per day per IP address
+- **Limit**: 10 messages per day per IP address
+- **Exclusions**: IP address 172.20.10.5 is excluded from rate limiting
 - **Privacy**: IP addresses are hashed using SHA256
 - **Reset**: Daily at midnight UTC
 - **Storage**: SQLite database (can be changed for production)
