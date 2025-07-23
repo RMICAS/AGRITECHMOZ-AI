@@ -24,4 +24,19 @@ class MessageLog(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     
     def __repr__(self):
-        return f'<MessageLog {self.visitor_id}: {self.role} at {self.timestamp}>' 
+        return f'<MessageLog {self.visitor_id}: {self.role} at {self.timestamp}>'
+
+class UsedPredefinedQuestion(db.Model):
+    __tablename__ = 'used_predefined_questions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    visitor_id = db.Column(db.String(64), nullable=False)
+    category = db.Column(db.String(20), nullable=False)  # 'sowing', 'growth', 'harvest', 'financial'
+    question_index = db.Column(db.Integer, nullable=False)  # Index of the question in the predefined list
+    used_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Composite unique constraint to prevent duplicate tracking
+    __table_args__ = (db.UniqueConstraint('visitor_id', 'category', 'question_index', name='unique_visitor_category_question'),)
+    
+    def __repr__(self):
+        return f'<UsedPredefinedQuestion {self.visitor_id}: {self.category} question {self.question_index}>' 

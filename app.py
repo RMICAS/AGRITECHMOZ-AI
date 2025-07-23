@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
-from models import db, UsageTracker, MessageLog
+from models import db, UsageTracker, MessageLog, UsedPredefinedQuestion
 from helpers import (
     check_and_update_limit, 
     log_message, 
@@ -73,6 +73,45 @@ def send_message():
         return jsonify({'response': ai_response, 'message': user_message})
     except Exception as e:
         app.logger.error(f"Erro no endpoint de envio de mensagem: {str(e)}")
+        return jsonify({'error': 'Erro interno do servidor.'}), 500
+
+@app.route('/api/question_counts', methods=['GET'])
+def get_question_counts():
+    """Get the count of used questions for each category for the current visitor"""
+    try:
+        ip_address = request.remote_addr
+        visitor_id = hash_ip_address(ip_address)
+        
+        # Get counts for each category
+        categories = ['sowing', 'growth', 'harvest', 'financial']
+        counts = {}
+        
+        for category in categories:
+            used_count = UsedPredefinedQuestion.query.filter_by(
+                visitor_id=visitor_id,
+                category=category
+            ).count()
+            counts[category] = max(0, 10 - used_count)  # 10 is the total available questions
+        
+        return jsonify(counts)
+    except Exception as e:
+        app.logger.error(f"Error getting question counts: {str(e)}")
+        return jsonify({'error': 'Erro interno do servidor.'}), 500
+
+@app.route('/api/reset_question_counts', methods=['POST'])
+def reset_question_counts():
+    """Reset question counts for the current visitor"""
+    try:
+        ip_address = request.remote_addr
+        visitor_id = hash_ip_address(ip_address)
+        
+        # Delete all used questions for this visitor
+        UsedPredefinedQuestion.query.filter_by(visitor_id=visitor_id).delete()
+        db.session.commit()
+        
+        return jsonify({'message': 'Question counts reset successfully'})
+    except Exception as e:
+        app.logger.error(f"Error resetting question counts: {str(e)}")
         return jsonify({'error': 'Erro interno do servidor.'}), 500
 
 @app.route('/api/health', methods=['GET'])

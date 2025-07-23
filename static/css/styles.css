@@ -176,17 +176,47 @@ body {
     background: white;
 }
 
-.chat-input-container input {
+.chat-input-container input,
+.chat-input-container .chat-textarea {
     border: none;
     border-radius: 20px;
     padding: 15px 60px 15px 20px;
     font-size: 0.85rem;
     width: 100%;
+    resize: none;
+    overflow-y: auto;
+    min-height: 50px;
+    max-height: 120px;
+    line-height: 1.4;
+    word-wrap: break-word;
+    white-space: pre-wrap;
 }
 
-.chat-input-container input:focus {
+.chat-input-container input:focus,
+.chat-input-container .chat-textarea:focus {
     outline: none;
     box-shadow: none;
+}
+
+/* Mobile-specific textarea styling */
+@media (max-width: 768px) {
+    .chat-input-container .chat-textarea {
+        min-height: 48px; /* 2 lines of text (24px * 2) */
+        max-height: 90px;
+        font-size: 0.9rem;
+        line-height: 1.3;
+        padding: 5px 60px 12px 15px;
+        resize: none;
+        overflow-y: auto;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+    }
+    
+    /* Ensure the textarea shows 2 lines by default on mobile */
+    .chat-input-container .chat-textarea:not(:focus) {
+        height: 48px;
+    }
 }
 
 .send-button {
@@ -269,11 +299,11 @@ body {
 .cards-scroll-container {
     overflow-x: auto;
     overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
     scrollbar-color: #2E7D32 #f1f1f1;
     padding-bottom: 15px;
     margin-bottom: 5px;
+    touch-action: none;
 }
 
 .cards-scroll-container::-webkit-scrollbar {
@@ -587,6 +617,7 @@ body {
     width: 80%;
     position: relative;
     box-sizing: border-box;
+    touch-action: none;
 }
 
 .crops-slider {
@@ -594,6 +625,7 @@ body {
     transition: transform 0.3s ease;
     width: 100%;
     will-change: transform;
+    touch-action: none;
 }
 
 .crop-btn {
@@ -671,6 +703,7 @@ body {
 @media (max-width: 768px) {
     .crops-container {
         width: 75%;
+        touch-action: none;
     }
     
     .crop-btn {
@@ -683,6 +716,7 @@ body {
 @media (max-width: 576px) {
     .crops-container {
         width: 70%;
+        touch-action: none;
     }
     
     .crop-btn {
@@ -701,6 +735,7 @@ body {
 @media (max-width: 430px) {
     .crops-container {
         width: calc(90px * 2 + 10px);
+        touch-action: none;
     }
     
     .crop-btn {
@@ -1008,7 +1043,6 @@ body {
     
     /* Improved mobile scrolling */
     .chat-messages {
-        -webkit-overflow-scrolling: touch;
         scroll-behavior: smooth;
         min-height: 40vh;
         max-height: 50vh;
@@ -1019,8 +1053,8 @@ body {
     }
     
     .cards-scroll-container {
-        -webkit-overflow-scrolling: touch;
         scroll-behavior: smooth;
+        touch-action: none;
     }
     
     /* Better mobile typography */

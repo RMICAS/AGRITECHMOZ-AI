@@ -57,13 +57,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Total questions available (for display)
     const totalQuestions = 10;
     
-    // Initialize counters from localStorage if available
-    function initializeCounters() {
-        const savedCounters = localStorage.getItem('questionCounters');
-        if (savedCounters) {
-            questionCounters = JSON.parse(savedCounters);
+    // Initialize counters from backend
+    async function initializeCounters() {
+        try {
+            const response = await fetch('/api/question_counts');
+            if (response.ok) {
+                const counts = await response.json();
+                questionCounters = counts;
+            } else {
+                // Fallback to localStorage if backend fails
+                const savedCounters = localStorage.getItem('questionCounters');
+                if (savedCounters) {
+                    questionCounters = JSON.parse(savedCounters);
+                }
+            }
+            updateAllCounters();
+        } catch (error) {
+            console.error('Error fetching question counts:', error);
+            // Fallback to localStorage
+            const savedCounters = localStorage.getItem('questionCounters');
+            if (savedCounters) {
+                questionCounters = JSON.parse(savedCounters);
+            }
+            updateAllCounters();
         }
-        updateAllCounters();
     }
     
     // Mobile carousel navigation functions
@@ -133,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Decrease counter for a category
-    function decreaseCounter(category) {
+    async function decreaseCounter(category) {
         if (questionCounters[category] > 0) {
             questionCounters[category]--;
             localStorage.setItem('questionCounters', JSON.stringify(questionCounters));
@@ -148,7 +165,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Reset all counters (for testing or new session)
-    function resetCounters() {
+    async function resetCounters() {
+        try {
+            // Clear backend data by making a request to reset
+            await fetch('/api/reset_question_counts', { method: 'POST' });
+        } catch (error) {
+            console.error('Error resetting question counts:', error);
+        }
+        
         questionCounters = {
             sowing: totalQuestions,
             growth: totalQuestions,
@@ -384,69 +408,9 @@ document.addEventListener('DOMContentLoaded', function() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // UPDATED: Handle card clicks to fetch from the backend
-    async function handleCardClick(card) {
-        // Check for first interaction
-        checkFirstInteraction();
-        
-        if (!selectedCrop) {
-            addMessage("Por favor, seleciona uma cultura primeiro antes de escolher uma fase.", false, true);
-            return;
-        }
-        
-        if (isRateLimited) {
-            addMessage("Atingiu o limite diário de mensagens. Tente novamente amanhã.", false, true);
-            return;
-        }
-        
-        const category = card.getAttribute('data-category');
-        
-        // Check if counter is available for this category
-        if (questionCounters[category] <= 0) {
-            addMessage("Já utilizaste todas as perguntas disponíveis para esta categoria. Tenta outra categoria ou faz uma pergunta livre.", false, true);
-            return;
-        }
-        
-        try {
-            card.style.opacity = '0.7';
-            card.style.cursor = 'wait';
-            
-            // Fetch predefined Q&A from your Python backend
-            const response = await fetch(`/api/predefined?crop=${selectedCrop}&stage=${category}`);
-            const data = await response.json();
-            
-            if (response.ok) {
-                // Store the category for this predefined question
-                currentPredefinedCategory = category;
-                
-                // Instead of automatically sending the message, put it in the chat input
-                chatInput.value = data.prompt;
-                chatInput.focus();
-                
-                // Show a hint message to the user
-                addMessage("Pergunta carregada! Clica em enviar para obter a resposta.", false);
-            } else {
-                if (response.status === 429) { // Specifically check for the rate limit status code
-                    isRateLimited = true;
-                    addMessage(data.error, false, true);
-                    disableChatInput();
-                } else {
-                    addMessage(data.error || 'Falha ao obter conselhos agrícolas. Tente novamente.', false, true);
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching predefined Q&A:', error);
-            addMessage('Erro de rede. Verifica a tua ligação e tenta novamente.', false, true);
-        } finally {
-            card.style.opacity = '1';
-            card.style.cursor = 'pointer';
-        }
-    }
 
-    // Add click event listeners to all cards (This is fine, no changes)
-    document.querySelectorAll('.card').forEach(card => {
-        card.addEventListener('click', () => handleCardClick(card));
-    });
+
+
     
     // Hamburger Menu functionality
     function toggleHamburgerMenu() {
@@ -486,9 +450,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Event listener for sign off button
     if (signOffButton) {
-        signOffButton.addEventListener('click', () => {
+        signOffButton.addEventListener('click', async () => {
             // Reset counters and reload
-            resetCounters();
+            await resetCounters();
             location.reload();
         });
         console.log('Sign off button event listener added');
@@ -548,8 +512,30 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', () => {
         visibleCrops = getVisibleCropsCount();
         updateArrowStates();
+        
+        // Re-initialize textarea height on resize for mobile
+        if (window.innerWidth <= 768 && chatInput.tagName === 'TEXTAREA') {
+            setTimeout(() => {
+                chatInput.style.height = '48px';
+            }, 100);
+        }
     });
 
+    // Auto-resize textarea function
+    function autoResizeTextarea() {
+        if (chatInput.tagName === 'TEXTAREA') {
+            chatInput.style.height = 'auto';
+            let newHeight = Math.min(chatInput.scrollHeight, 120); // Max height of 120px
+            
+            // On mobile, ensure minimum 2 lines (48px)
+            if (window.innerWidth <= 768 && newHeight < 48) {
+                newHeight = 48;
+            }
+            
+            chatInput.style.height = newHeight + 'px';
+        }
+    }
+    
     // Event listeners for chat with improved handling
     let isSending = false;
     
@@ -562,7 +548,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    chatInput.addEventListener('keypress', function(e) {
+
+    
+    // Auto-resize textarea on input
+    chatInput.addEventListener('input', autoResizeTextarea);
+    
+    // Handle Enter key for new lines
+    chatInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             if (isSending || sendButton.disabled) return;
@@ -571,17 +563,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 isSending = false;
             });
         }
+        // Shift+Enter will create a new line (default behavior)
     });
+    
+    // Initialize textarea height
+    autoResizeTextarea();
+    
+    // Ensure mobile textarea starts with 2 lines
+    if (window.innerWidth <= 768 && chatInput.tagName === 'TEXTAREA') {
+        chatInput.style.height = '48px';
+    }
     
     // Initialize the crop carousel (This is fine, no changes)
     initCropCarousel();
+    
+    // Add click event listeners to all cards
+    console.log('🔗 Attaching event listeners to cards...');
+    const cards = document.querySelectorAll('.card');
+    console.log('Found cards:', cards.length);
+    cards.forEach(card => {
+        console.log('Adding listener to card:', card.getAttribute('data-category'));
+        card.addEventListener('click', () => handleCardClickEnhanced(card));
+    });
+    console.log('✅ Event listeners attached successfully');
     
     // Check for first interaction when page loads
     checkFirstInteraction();
     
     // Initialize counters on page load with a small delay to ensure DOM is ready
-    setTimeout(() => {
-        initializeCounters();
+    setTimeout(async () => {
+        await initializeCounters();
             // Initialize mobile carousel
     if (mobileCardsContainer) {
         updateMobileArrowStates();
@@ -683,45 +694,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Enhanced message display for mobile
-    function addMessage(message, isUser = false, isError = false, isWelcome = false) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'} ${isError ? 'error-message' : ''}`;
-        
-        const messageContent = document.createElement('div');
-        messageContent.className = 'message-content';
-        
-        const icon = document.createElement('i');
-        icon.className = `fas ${isUser ? 'fa-user' : 'fa-robot'} message-icon`;
-        
-        const text = document.createElement('p');
-        text.innerHTML = formatMessage(message);
-        
-        messageContent.appendChild(icon);
-        messageContent.appendChild(text);
-        messageDiv.appendChild(messageContent);
-        
-        chatMessages.appendChild(messageDiv);
-        
-        // Enhanced scroll behavior for mobile
-        if (isMobile) {
-            setTimeout(() => {
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 100);
-        } else {
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        // Add haptic feedback on mobile (if supported)
-        if (isMobile && 'vibrate' in navigator) {
-            navigator.vibrate(50);
-        }
-        
-        // Switch logos on mobile after first user message
-        if (isUser && isMobile) {
-            switchLogosOnMobile();
-        }
-    }
+
 
     // Improved send function with better mobile handling
     async function handleSend() {
@@ -733,6 +706,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Clear input immediately for better UX
         chatInput.value = '';
+        
+        // Reset textarea height on mobile
+        if (window.innerWidth <= 768 && chatInput.tagName === 'TEXTAREA') {
+            chatInput.style.height = '48px';
+        }
         
         // Add user message
         addMessage(message, true);
@@ -751,7 +729,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // If we have a current predefined category, this is likely a predefined question
             isPredefinedQuestion = true;
             // Decrease counter for predefined questions
-            if (decreaseCounter(currentPredefinedCategory)) {
+            if (await decreaseCounter(currentPredefinedCategory)) {
                 // Clear the current predefined category
                 currentPredefinedCategory = null;
             }
@@ -790,45 +768,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-    // Improved mobile carousel with touch gestures
+    // Mobile carousel without touch gestures - only arrow navigation
     function addMobileCarouselTouchSupport() {
-        if (!mobileCardsContainer) return;
-        
-        let startX = 0;
-        let currentX = 0;
-        let isDragging = false;
-        
-        mobileCardsContainer.addEventListener('touchstart', function(e) {
-            startX = e.touches[0].clientX;
-            isDragging = true;
-            this.style.transition = 'none';
-        });
-        
-        mobileCardsContainer.addEventListener('touchmove', function(e) {
-            if (!isDragging) return;
-            e.preventDefault();
-            currentX = e.touches[0].clientX;
-            const diff = currentX - startX;
-            this.style.transform = `translateX(${diff}px)`;
-        });
-        
-        mobileCardsContainer.addEventListener('touchend', function(e) {
-            if (!isDragging) return;
-            isDragging = false;
-            this.style.transition = 'transform 0.3s ease';
-            this.style.transform = '';
-            
-            const diff = currentX - startX;
-            const threshold = 50;
-            
-            if (Math.abs(diff) > threshold) {
-                if (diff > 0) {
-                    mobilePrevSlide();
-                } else {
-                    mobileNextSlide();
-                }
-            }
-        });
+        // Touch functionality removed - carousel only responds to arrow clicks
+        // This function is kept for consistency but does nothing
     }
 
     // Initialize mobile enhancements
@@ -840,8 +783,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Handle keyboard visibility
         window.addEventListener('resize', adjustForKeyboard);
         
-        // Add keyboard event listeners
-        chatInput.addEventListener('keypress', handleKeyPress);
+
         
         // Initialize logo elements
         const logoSection = document.getElementById('logoSection');
@@ -867,19 +809,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Enhanced card click handling for mobile
-    async function handleCardClick(card) {
+    async function handleCardClickEnhanced(card) {
+        console.log('=== CARD CLICKED ===');
+        console.log('Card clicked! selectedCrop:', selectedCrop);
+        console.log('Card category:', card.getAttribute('data-category'));
+        
+        // Check for first interaction
+        checkFirstInteraction();
+        
         if (!selectedCrop) {
-            addMessage("Por favor, seleciona uma cultura primeiro.", false, true);
+            console.log('❌ No crop selected, showing error message IMMEDIATELY');
+            
+            // Show error message in chat area only
+            const errorMessage = "Por favor, seleciona uma cultura primeiro antes de escolher uma fase!";
+            addMessage(errorMessage, false, true);
+            
+            return;
+        }
+        
+        if (isRateLimited) {
+            addMessage("Atingiu o limite diário de mensagens. Tente novamente amanhã.", false, true);
             return;
         }
         
         const category = card.getAttribute('data-category');
-        if (!category || questionCounters[category] <= 0) {
-            addMessage("Não há mais perguntas disponíveis para esta categoria.", false, true);
+        
+        // Check if counter is available for this category
+        if (questionCounters[category] <= 0) {
+            addMessage("Já utilizaste todas as perguntas disponíveis para esta categoria. Tenta outra categoria ou faz uma pergunta livre.", false, true);
             return;
         }
         
-        // Add haptic feedback
+        // Add haptic feedback for mobile
         if (isMobile && 'vibrate' in navigator) {
             navigator.vibrate(30);
         }
@@ -889,10 +850,11 @@ document.addEventListener('DOMContentLoaded', function() {
             chatMessages.classList.add('visible');
         }
         
-        // Set loading state
-        setLoadingState(true);
-        
         try {
+            card.style.opacity = '0.7';
+            card.style.cursor = 'wait';
+            
+            // Fetch predefined Q&A from your Python backend
             const response = await fetch(`/api/predefined?crop=${selectedCrop}&stage=${category}`);
             const data = await response.json();
             
@@ -904,16 +866,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 chatInput.value = data.prompt;
                 chatInput.focus();
                 
+                // Ensure textarea height is appropriate for mobile
+                if (window.innerWidth <= 768 && chatInput.tagName === 'TEXTAREA') {
+                    setTimeout(() => {
+                        autoResizeTextarea();
+                    }, 100);
+                }
+                
                 // Show a hint message to the user
                 addMessage("Pergunta carregada! Clica em enviar para obter a resposta.", false);
             } else {
-                addMessage(data.error || 'Erro ao obter pergunta pré-definida.', false, true);
+                if (response.status === 429) { // Specifically check for the rate limit status code
+                    isRateLimited = true;
+                    addMessage(data.error, false, true);
+                    disableChatInput();
+                } else {
+                    addMessage(data.error || 'Falha ao obter conselhos agrícolas. Tente novamente.', false, true);
+                }
             }
         } catch (error) {
-            console.error('Error:', error);
-            addMessage('Erro de conexão. Verifique sua internet e tente novamente.', false, true);
+            console.error('Error fetching predefined Q&A:', error);
+            addMessage('Erro de rede. Verifica a tua ligação e tenta novamente.', false, true);
         } finally {
-            setLoadingState(false);
+            card.style.opacity = '1';
+            card.style.cursor = 'pointer';
         }
     }
 

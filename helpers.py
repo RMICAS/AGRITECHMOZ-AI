@@ -4,7 +4,7 @@ import os
 from datetime import datetime, date
 from flask import current_app
 import google.generativeai as genai
-from models import db, UsageTracker, MessageLog
+from models import db, UsageTracker, MessageLog, UsedPredefinedQuestion
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -232,10 +232,12 @@ def get_used_questions(visitor_id, category):
     Get list of used question indices for a visitor and category
     """
     try:
-        # This would typically be stored in a database
-        # For now, we'll use a simple in-memory approach
-        # In production, you'd want to store this in the database
-        return []
+        used_questions = UsedPredefinedQuestion.query.filter_by(
+            visitor_id=visitor_id,
+            category=category
+        ).all()
+        
+        return [uq.question_index for uq in used_questions]
     except Exception as e:
         current_app.logger.error(f"Error getting used questions: {str(e)}")
         return []
@@ -245,9 +247,13 @@ def mark_question_as_used(visitor_id, category, question_index):
     Mark a question as used for a visitor and category
     """
     try:
-        # This would typically be stored in a database
-        # For now, we'll use a simple in-memory approach
-        # In production, you'd want to store this in the database
-        pass
+        used_question = UsedPredefinedQuestion(
+            visitor_id=visitor_id,
+            category=category,
+            question_index=question_index
+        )
+        db.session.add(used_question)
+        db.session.commit()
     except Exception as e:
-        current_app.logger.error(f"Error marking question as used: {str(e)}") 
+        current_app.logger.error(f"Error marking question as used: {str(e)}")
+        db.session.rollback() 

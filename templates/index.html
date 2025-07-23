@@ -240,15 +240,16 @@
 
                 <!-- Chat Input -->
                 <div class="chat-input-container">
-                    <input type="text" 
-                           class="form-control" 
-                           placeholder="Pergunta-me qualquer coisa sobre agricultura" 
-                           id="chatInput"
-                           autocomplete="off"
-                           autocorrect="off"
-                           autocapitalize="sentences"
-                           spellcheck="true"
-                           enterkeyhint="send">
+                    <textarea class="form-control chat-textarea" 
+                              placeholder="Pergunta-me qualquer coisa sobre agricultura" 
+                              id="chatInput"
+                              autocomplete="off"
+                              autocorrect="off"
+                              autocapitalize="sentences"
+                              spellcheck="true"
+                              rows="1"
+                              maxlength="500"
+                              wrap="soft"></textarea>
                     <button class="send-button" id="sendButton" type="button" aria-label="Enviar mensagem">
                         <i class="fas fa-arrow-up"></i>
                         <div class="button-loading d-none">
