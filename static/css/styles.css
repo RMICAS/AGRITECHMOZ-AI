@@ -167,7 +167,7 @@ body {
 .chat-input-container {
     position: relative;
     margin-bottom: 30px;
-    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 25px;
     padding: 10px;
     border-color: #53535321;
@@ -179,25 +179,12 @@ body {
 
 .chat-input-container.question-loaded {
     border-color: #2E7D32;
-    box-shadow: 0 0 20px rgba(46, 125, 50, 0.6), 0 4px 12px rgba(46, 125, 50, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
-    animation: glowEffect 3s ease-out forwards;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .chat-input-container.question-loaded.glow-finished {
     border-color: #2E7D32;
-    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-@keyframes glowEffect {
-    0% {
-        box-shadow: 0 0 20px rgba(46, 125, 50, 0.8), 0 4px 12px rgba(46, 125, 50, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    50% {
-        box-shadow: 0 0 25px rgba(46, 125, 50, 0.9), 0 4px 12px rgba(46, 125, 50, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    100% {
-        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .chat-input-container input,
@@ -958,10 +945,20 @@ body {
 }
 
 /* Disabled chat input styles */
-.chat-input-container input:disabled {
-    background-color: #f5f5f5;
-    color: #999;
+.chat-input-container input:disabled,
+.chat-input-container .chat-textarea:disabled {
+    background-color: #ffffff;
+    color: #ffffff;
     cursor: not-allowed;
+}
+
+.chat-input-container .chat-textarea:disabled::placeholder {
+    color: #ffffff;
+}
+
+/* Ensure textarea is white when placeholder is empty during loading */
+.chat-input-container .chat-textarea[placeholder=""] {
+    color: #ffffff;
 }
 
 .send-button:disabled {
@@ -1197,7 +1194,7 @@ body {
 
 /* Loading states for better UX */
 .send-button.loading {
-    background-color: #6c757d;
+    background-color: #2E7D32 !important;
     pointer-events: none;
 }
 

@@ -682,6 +682,9 @@ document.addEventListener('DOMContentLoaded', function() {
             sendButton.classList.add('loading');
             sendButton.disabled = true;
             chatInput.disabled = true;
+            // Clear textarea and hide placeholder during loading
+            chatInput.value = '';
+            chatInput.placeholder = '';
             // Add visual feedback
             if (buttonIcon) buttonIcon.style.display = 'none';
             if (buttonLoading) buttonLoading.classList.remove('d-none');
@@ -689,6 +692,8 @@ document.addEventListener('DOMContentLoaded', function() {
             sendButton.classList.remove('loading');
             sendButton.disabled = false;
             chatInput.disabled = false;
+            // Restore placeholder
+            chatInput.placeholder = 'Pergunta-me qualquer coisa sobre agricultura';
             // Restore visual state
             if (buttonIcon) buttonIcon.style.display = 'inline-block';
             if (buttonLoading) buttonLoading.classList.add('d-none');
@@ -708,8 +713,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Hide logo section on first message
         hideLogoSection();
         
-        // Clear input immediately for better UX
+        // Clear input immediately for better UX and hide placeholder
         chatInput.value = '';
+        chatInput.placeholder = '';
         
         // Reset textarea height on mobile
         if (window.innerWidth <= 768 && chatInput.tagName === 'TEXTAREA') {
