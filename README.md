@@ -172,7 +172,7 @@ AgritechMoz-Chat/
 - Cabbage
 - Maize
 - Rice
-- Cassava
+- Mandioca
 - Beans
 - Cotton
 

@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // List of all crops
     const crops = [
         'Tomate', 'Cenoura', 'Cebola', 'Couve', 'Repolho', 
-        'Milho', 'Arroz', 'Mandioqueira', 'Feijão', 'Algodão'
+        'Milho', 'Arroz', 'Mandioca', 'Feijão', 'Algodão'
     ];
 
     // Check if this is the first interaction of the session
@@ -387,6 +387,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to add a new message
     function addMessage(message, isUser = false, isError = false, isWelcome = false) {
+        // Only make chat area visible when a message is actually added
         if (chatMessages.children.length === 0) {
             chatMessages.classList.add('visible');
         }
@@ -704,6 +705,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check for first interaction
         checkFirstInteraction();
         
+        // Hide logo section on first message
+        hideLogoSection();
+        
         // Clear input immediately for better UX
         chatInput.value = '';
         
@@ -714,11 +718,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Add user message
         addMessage(message, true);
-        
-        // Show chat messages if hidden
-        if (!chatMessages.classList.contains('visible')) {
-            chatMessages.classList.add('visible');
-        }
         
         // Set loading state
         setLoadingState(true);
@@ -845,10 +844,7 @@ document.addEventListener('DOMContentLoaded', function() {
             navigator.vibrate(30);
         }
         
-        // Show chat messages if hidden
-        if (!chatMessages.classList.contains('visible')) {
-            chatMessages.classList.add('visible');
-        }
+
         
         try {
             card.style.opacity = '0.7';
@@ -873,8 +869,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 100);
                 }
                 
-                // Show a hint message to the user
-                addMessage("Pergunta carregada! Clica em enviar para obter a resposta.", false);
+                // Add green border effect to draw attention to chat area
+                const chatInputContainer = document.querySelector('.chat-input-container');
+                chatInputContainer.classList.add('question-loaded');
+                
+                // After 3 seconds, keep the green border but remove the glow effect
+                setTimeout(() => {
+                    chatInputContainer.classList.add('glow-finished');
+                }, 3000);
             } else {
                 if (response.status === 429) { // Specifically check for the rate limit status code
                     isRateLimited = true;
@@ -898,18 +900,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const logoSection = document.getElementById('logoSection');
     const smallLogo = document.getElementById('smallLogo');
     
-    // Function to switch logos on mobile after first message
-    function switchLogosOnMobile() {
-        if (isMobile && !firstMessageSent) {
+    // Function to hide logo section after first message
+    function hideLogoSection() {
+        if (!firstMessageSent) {
             firstMessageSent = true;
             
             // Hide entire logo section with animation
-            logoSection.classList.add('hidden');
+            if (logoSection) {
+                logoSection.classList.add('hidden');
+            }
             
-            // Show small logo with animation
-            setTimeout(() => {
-                smallLogo.classList.add('visible');
-            }, 300); // Wait for logo section to fade out
+            // Show small logo with animation (mobile only)
+            if (isMobile && smallLogo) {
+                setTimeout(() => {
+                    smallLogo.classList.add('visible');
+                }, 300); // Wait for logo section to fade out
+            }
         }
     }
 

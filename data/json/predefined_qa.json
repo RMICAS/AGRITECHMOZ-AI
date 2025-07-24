@@ -52,7 +52,7 @@
         },
         {
             "prompt": "Como posso controlar pragas em quintas de [CROP] sem químicos?",
-            "answer": "Para controlo orgânico de pragas em quintas de [CROP], implementa:\n• Consociação com plantas repelentes de pragas\n• Sprays de extracto de neem\n• Encoraçamento de predadores naturais mantendo biodiversidade\n• Barreiras físicas\n• Monitorização regular para deteção precoce\n• Rotação de culturas e manutenção de solo saudável"
+            "answer": "**Para controlo orgânico de pragas em quintas de [CROP], implementa:**\n• Consociação com plantas repelentes de pragas\n• Sprays de extracto de neem\n• Encoraçamento de predadores naturais mantendo biodiversidade\n• Barreiras físicas\n• Monitorização regular para deteção precoce\n• Rotação de culturas e manutenção de solo saudável"
         },
         {
             "prompt": "Qual é a melhor prática para gestão de [CROP] durante o crescimento?",
@@ -68,7 +68,7 @@
         },
         {
             "prompt": "Como posso melhorar a produtividade de [CROP]?",
-            "answer": "Para melhorar a produtividade de [CROP], implementa:\n• Seleção adequada de variedades\n• Densidade de plantação ótima\n• Controlo atempado de pragas e doenças\n• Gestão apropriada de nutrientes e água\n• Monitorização regular para intervenções atempadas\n• Manutenção da saúde do solo com matéria orgânica\n• Rotação adequada de culturas"
+            "answer": "**Para melhorar a produtividade de [CROP], implementa:**\n• Seleção adequada de variedades\n• Densidade de plantação ótima\n• Controlo atempado de pragas e doenças\n• Gestão apropriada de nutrientes e água\n• Monitorização regular para intervenções atempadas\n• Manutenção da saúde do solo com matéria orgânica\n• Rotação adequada de culturas"
         },
         {
             "prompt": "Qual é o método recomendado de controlo de ervas daninhas para [CROP]?",
@@ -128,7 +128,7 @@
     "financial": [
         {
             "prompt": "Como calculo os custos de produção para 1 hectare de [CROP]?",
-            "answer": "Para calcular custos de produção para 1 hectare de [CROP], inclui:\n• Inputs: sementes/plântulas, fertilizantes, pesticidas\n• Mão-de-obra: preparação da terra, plantação, sacha, pulverização, colheita\n• Infraestrutura: rega, maquinaria, transporte, armazenamento\n• Custos fixos: renda da terra, depreciação de equipamento\n\nCriar um orçamento detalhado com todos estes componentes dar-te-á uma imagem precisa do investimento total."
+            "answer": "**Para calcular custos de produção para 1 hectare de [CROP], inclui:**\n• Inputs: sementes/plântulas, fertilizantes, pesticidas\n• Mão-de-obra: preparação da terra, plantação, sacha, pulverização, colheita\n• Infraestrutura: rega, maquinaria, transporte, armazenamento\n• Custos fixos: renda da terra, depreciação de equipamento\n\nCriar um orçamento detalhado com todos estes componentes dar-te-á uma imagem precisa do investimento total."
         },
         {
             "prompt": "Qual é o retorno esperado do investimento para agricultura de [CROP]?",
@@ -160,7 +160,7 @@
         },
         {
             "prompt": "Como posso reduzir custos de produção para agricultura de [CROP]?",
-            "answer": "Para reduzir custos de produção de [CROP], implementa:\n• Otimização de fertilizantes e pesticidas através de análise do solo e MIP\n• Melhoria da eficiência da água com sistemas de rega apropriados\n• Mecanização de operações onde custo-eficaz\n• Uso de culturas de cobertura para reduzir necessidades de input\n• Rotação de culturas para quebrar ciclos de pragas\n• Compra a granel de inputs através de grupos de agricultores\n• Manutenção de registos detalhados"
+            "answer": "**Para reduzir custos de produção de [CROP], implementa:**\n• Otimização de fertilizantes e pesticidas através de análise do solo e MIP\n• Melhoria da eficiência da água com sistemas de rega apropriados\n• Mecanização de operações onde custo-eficaz\n• Uso de culturas de cobertura para reduzir necessidades de input\n• Rotação de culturas para quebrar ciclos de pragas\n• Compra a granel de inputs através de grupos de agricultores\n• Manutenção de registos detalhados"
         },
         {
             "prompt": "Que subsídios governamentais estão disponíveis para agricultores de [CROP] em Moçambique?",
