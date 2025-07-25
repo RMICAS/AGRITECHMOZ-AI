@@ -198,8 +198,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // List of all crops
     const crops = [
-        'Tomate', 'Cenoura', 'Cebola', 'Couve', 'Repolho', 
-        'Milho', 'Arroz', 'Mandioca', 'Feijão', 'Algodão'
+        'Arroz', 'Algodão', 'Cebola', 'Couve', 'Cenoura', 
+        'Feijão', 'Mandioca', 'Milho', 'Repolho', 'Tomate'
     ];
 
     // Check if this is the first interaction of the session
@@ -733,11 +733,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentPredefinedCategory && selectedCrop) {
             // If we have a current predefined category, this is likely a predefined question
             isPredefinedQuestion = true;
-            // Decrease counter for predefined questions
-            if (await decreaseCounter(currentPredefinedCategory)) {
-                // Clear the current predefined category
-                currentPredefinedCategory = null;
-            }
+            // Counter was already decreased when card was clicked, just clear the category
+            currentPredefinedCategory = null;
         }
         
         try {
@@ -850,7 +847,14 @@ document.addEventListener('DOMContentLoaded', function() {
             navigator.vibrate(30);
         }
         
-
+        // Decrease counter immediately when card is clicked
+        if (await decreaseCounter(category)) {
+            // Store the category for this predefined question
+            currentPredefinedCategory = category;
+        } else {
+            // If counter couldn't be decreased, don't proceed
+            return;
+        }
         
         try {
             card.style.opacity = '0.7';
@@ -861,9 +865,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             if (response.ok) {
-                // Store the category for this predefined question
-                currentPredefinedCategory = category;
-                
                 // Instead of automatically sending the message, put it in the chat input
                 chatInput.value = data.prompt;
                 chatInput.focus();
